@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppHeader } from '../components/chrome';
@@ -84,7 +84,51 @@ export function PaymentScreen(): React.JSX.Element {
         <Button variant="ghost" className="mt-8 w-full" onClick={() => void navigate('/')}>
           Continuar a ver o mercado
         </Button>
+
+        {import.meta.env.DEV && order.paymentRef && (
+          <DevPaymentControls paymentRef={order.paymentRef} />
+        )}
       </main>
     </>
+  );
+}
+
+/**
+ * Development only: there is no MB WAY application to confirm in, so this does
+ * what the gateway's webhook would do. The API refuses these routes outside
+ * development, and this block is stripped from a production build.
+ */
+function DevPaymentControls({ paymentRef }: { paymentRef: string }): React.JSX.Element {
+  const queryClient = useQueryClient();
+
+  const simulate = useMutation({
+    mutationFn: (status: 'PAID' | 'FAILED') => api.simulatePayment(paymentRef, status),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
+  });
+
+  return (
+    <section className="mt-10 rounded-xl border border-dashed border-line p-4 text-left">
+      <p className="text-xs tracking-wide text-muted uppercase">Apenas em desenvolvimento</p>
+      <div className="mt-3 flex gap-2">
+        <Button
+          variant="secondary"
+          className="flex-1"
+          disabled={simulate.isPending}
+          onClick={() => simulate.mutate('PAID')}
+        >
+          Confirmar pagamento
+        </Button>
+        <Button
+          variant="secondary"
+          className="flex-1"
+          disabled={simulate.isPending}
+          onClick={() => simulate.mutate('FAILED')}
+        >
+          Recusar
+        </Button>
+      </div>
+    </section>
   );
 }

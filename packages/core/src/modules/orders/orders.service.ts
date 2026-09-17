@@ -24,6 +24,8 @@ export interface OrderSummary {
   totalCents: number;
   createdAt: string;
   expiresAt: string;
+  /** The gateway's own reference. The mock provider's dev route needs it. */
+  paymentRef: string | null;
   items: {
     id: string;
     productId: string;
@@ -254,6 +256,7 @@ export class OrdersService {
     totalCents: number;
     createdAt: Date;
     expiresAt: Date;
+    paymentRef: string | null;
     items: {
       id: string;
       productId: string;
@@ -276,6 +279,7 @@ export class OrdersService {
       totalCents: order.totalCents,
       createdAt: order.createdAt.toISOString(),
       expiresAt: order.expiresAt.toISOString(),
+      paymentRef: order.paymentRef,
       items: order.items.map((item) => ({
         id: item.id,
         productId: item.productId,

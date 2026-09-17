@@ -84,6 +84,7 @@ export interface OrderSummary {
   totalCents: number;
   createdAt: string;
   expiresAt: string;
+  paymentRef: string | null;
   items: {
     id: string;
     productId: string;
@@ -130,4 +131,14 @@ export const api = {
     }),
 
   myOrders: () => request<OrderSummary[]>('/me/orders'),
+
+  /**
+   * Development only: stands in for the participant confirming in the MB WAY
+   * app. The API refuses this route outside development.
+   */
+  simulatePayment: (paymentRef: string, status: 'PAID' | 'FAILED') =>
+    request<{ applied: boolean }>(`/dev/payments/${paymentRef}/${status}`, {
+      method: 'POST',
+      body: '{}',
+    }),
 };

@@ -7,26 +7,104 @@ A especificação completa está em
 [Bolsa de Bebidas — Especificação Técnica para Implementação.md](./Bolsa%20de%20Bebidas%20—%20Especificação%20Técnica%20para%20Implementação.md).
 O roadmap por fases está na secção 14 desse documento.
 
-## Pré-requisitos
+## O que precisa de instalar
 
-| Ferramenta | Versão | Notas |
+| Ferramenta | Versão | Para quê |
 | --- | --- | --- |
-| Node.js | ≥ 20.11 (testado em 24) | |
+| Node.js | ≥ 20.11 (testado em 24) | tudo |
 | pnpm | 9.15.4 | via `corepack enable`, ou `corepack pnpm <cmd>` sem instalar nada |
-| Docker | qualquer versão recente | PostgreSQL 16 e Redis 7 locais |
+| **Docker Desktop** | recente | PostgreSQL 16 e Redis 7 |
 | Python | 3.11+ | apenas para `research/simulator` |
+
+**Docker Desktop é o único que falta instalar de raiz.** Descarregue de
+[docker.com](https://www.docker.com/products/docker-desktop/), instale e deixe-o a correr. No
+Windows pede o WSL2, que o próprio instalador ativa.
+
+Sem Docker é possível instalar PostgreSQL 16 e Redis nativamente, mas no Windows o Redis não tem
+build oficial — teria de usar o [Memurai](https://www.memurai.com/) (edição de programador
+gratuita). O caminho com Docker é mais curto.
 
 Se `corepack enable` falhar por falta de permissões no Windows, use `corepack pnpm ...`
 em vez de `pnpm ...` — funciona sem instalação global.
 
-## Arranque
+## Arranque, passo a passo
+
+**1. Configuração e dependências**
 
 ```bash
 cp .env.example .env
-docker compose -f infra/docker-compose.yml up -d
 corepack pnpm install
-corepack pnpm dev
 ```
+
+**2. Base de dados e Redis**
+
+```bash
+docker compose -f infra/docker-compose.yml up -d
+```
+
+Confirme que ambos estão de pé com `docker ps`. Deve ver `bolsa-postgres` e `bolsa-redis`.
+
+**3. Criar as tabelas**
+
+```bash
+corepack pnpm --filter @bolsa/db db:deploy
+```
+
+**4. Compilar**
+
+```bash
+corepack pnpm build
+```
+
+**5. Criar uma festa de teste**
+
+```bash
+corepack pnpm --filter @bolsa/api setup
+```
+
+Isto cria o evento já aberto, sete bebidas em três grupos de substituição, uma conta de
+administrador e uma conta de bar. **Guarde o que este comando imprime**: os endereços, as
+passwords e o segredo de 2FA do administrador, que só aparece aqui.
+
+Adicione esse segredo a uma aplicação de autenticação (Google Authenticator, Aegis, 1Password)
+antes de tentar entrar em `/admin`.
+
+**6. Levantar as três aplicações**, cada uma no seu terminal:
+
+```bash
+corepack pnpm --filter @bolsa/api start
+```
+
+```bash
+corepack pnpm --filter @bolsa/worker start
+```
+
+```bash
+corepack pnpm --filter @bolsa/web dev
+```
+
+O worker é o que faz os preços mexerem-se: de dois em dois minutos recalcula as cotações a partir
+das vendas pagas. Sem ele o mercado funciona, mas os preços ficam parados.
+
+## O que abrir
+
+O comando do passo 5 imprime estes endereços já com o identificador do evento:
+
+| Endereço | Quem usa |
+| --- | --- |
+| `/e/<idDoEvento>` | participante — é para aqui que o QR Code aponta |
+| `/staff` | bar, com a conta `bar@festa.pt` |
+| `/admin` | organizador, com `admin@festa.pt` e o código de 2FA |
+| `/screen?event=<idDoEvento>` | ecrã grande da festa |
+| `/prices?event=<idDoEvento>` | tabela mínimo–máximo para imprimir e afixar (L2) |
+
+Para experimentar o percurso completo: entre pelo endereço do participante, escolha um nome,
+adicione bebidas e pague. Como o gateway é simulado, a encomenda fica a aguardar confirmação e o
+ecrã de pagamento mostra, em modo de desenvolvimento, dois botões que fazem o que o webhook do MB
+WAY faria. Confirme, e o voucher aparece — pronto a ser lido em `/staff`.
+
+Esses botões só existem em desenvolvimento: o `import.meta.env.DEV` retira-os do build de produção
+e a API recusa a rota quando `NODE_ENV=production`.
 
 ## Testes sem Docker
 
