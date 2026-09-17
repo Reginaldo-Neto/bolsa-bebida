@@ -76,3 +76,5 @@ export const nifSchema = z
 export const localeSchema = z.enum(['pt-PT', 'en']);
 
 export const isoDateTimeSchema = z.string().datetime({ offset: true });
+
+export const stockStatusSchema = z.enum(['IN_STOCK', 'LOW', 'SOLD_OUT']);

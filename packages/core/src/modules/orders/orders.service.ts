@@ -5,6 +5,7 @@ import {
   type PaymentStatus,
   type QuoteItem,
   canTransitionOrder,
+  participantRoom,
 } from '@bolsa/shared';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
@@ -14,6 +15,7 @@ import type { ParticipantContext } from '../participants/participants.service';
 import { ParticipantsService } from '../participants/participants.service';
 import { PAYMENT_PROVIDER, type PaymentProvider } from '../payments/payment-provider';
 import { QuotesService } from '../quotes/quotes.service';
+import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { VouchersService } from '../vouchers/vouchers.service';
 
 export interface OrderSummary {
@@ -44,6 +46,7 @@ export class OrdersService {
     private readonly inventory: InventoryService,
     private readonly vouchers: VouchersService,
     private readonly participants: ParticipantsService,
+    private readonly realtime: RealtimePublisher,
     @Inject(PAYMENT_PROVIDER) private readonly payments: PaymentProvider,
   ) {}
 
@@ -143,7 +146,7 @@ export class OrdersService {
       return { applied: false };
     }
 
-    return this.prisma.client.$transaction(async (tx) => {
+    const outcome = await this.prisma.client.$transaction(async (tx) => {
       const payment = await tx.payment.findUnique({
         where: { providerRef },
         include: { order: { include: { items: true, voucher: true } } },
@@ -155,7 +158,7 @@ export class OrdersService {
 
       // Already resolved: acknowledge and do nothing.
       if (payment.status !== 'PENDING') {
-        return { applied: false };
+        return { applied: false, participantId: null, orderId: null, status: null };
       }
 
       const order = payment.order;
@@ -164,7 +167,7 @@ export class OrdersService {
           { orderId: order.id, from: order.status, to: status },
           'ignoring a payment outcome that the order cannot accept',
         );
-        return { applied: false };
+        return { applied: false, participantId: null, orderId: null, status: null };
       }
 
       await tx.payment.update({
@@ -200,8 +203,25 @@ export class OrdersService {
         });
       }
 
-      return { applied: true };
+      return {
+        applied: true,
+        participantId: order.participantId,
+        orderId: order.id,
+        status: status === 'PAID' ? 'PAID' : statusToOrder(status),
+      };
     });
+
+    // Published after the commit: a client told an order is paid must never
+    // find a database that does not agree yet.
+    if (outcome.applied && outcome.participantId && outcome.orderId) {
+      this.realtime.publish(participantRoom(outcome.participantId), 'order.updated', {
+        participantId: outcome.participantId,
+        orderId: outcome.orderId,
+        status: outcome.status ?? 'PAID',
+      });
+    }
+
+    return { applied: outcome.applied };
   }
 
   async listForParticipant(participantId: string): Promise<OrderSummary[]> {

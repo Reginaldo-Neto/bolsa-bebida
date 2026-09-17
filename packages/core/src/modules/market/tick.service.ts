@@ -1,10 +1,12 @@
 import { newId } from '@bolsa/db';
 import type { ProductState, TickOutput } from '@bolsa/pricing-engine';
 import { runTick } from '@bolsa/pricing-engine';
-import { eventAllowsPriceTicks } from '@bolsa/shared';
+import { changeRatio, eventAllowsPriceTicks, eventRoom } from '@bolsa/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 import { EventsService } from '../events/events.service';
+import { RealtimePublisher } from '../realtime/realtime.publisher';
+import { stockStatusOf } from './market.service';
 
 export interface TickResult {
   eventId: string;
@@ -24,6 +26,7 @@ export class TickService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
+    private readonly realtime: RealtimePublisher,
   ) {}
 
   async runFor(eventId: string, now: Date = new Date()): Promise<TickResult> {
@@ -58,6 +61,28 @@ export class TickService {
     });
 
     await this.persist(eventId, tick, output, paidUnits, now);
+
+    // Spec 10.2: the phones find out from here, not by polling.
+    this.realtime.publish(eventRoom(eventId), 'market.tick', {
+      eventId,
+      tick,
+      timestamp: now.toISOString(),
+      products: output.products.map((product) => ({
+        id: product.productId,
+        priceCents: product.currentPrice,
+        changeVsBasePct: changeRatio(product.currentPrice, product.basePrice),
+        stockStatus: stockStatusOf(product.stockAvailable, product.stockInitial),
+      })),
+    });
+
+    for (const product of output.products) {
+      if (product.stockAvailable === 0) {
+        this.realtime.publish(eventRoom(eventId), 'product.soldout', {
+          eventId,
+          productId: product.productId,
+        });
+      }
+    }
 
     return {
       eventId,

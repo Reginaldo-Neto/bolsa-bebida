@@ -5,12 +5,28 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../app.module';
 import { ProblemDetailsFilter } from '../common/problem.filter';
+import {
+  REDIS_PUBLISHER,
+  REDIS_SUBSCRIBER,
+  RedisConnections,
+} from '../modules/realtime/redis.provider';
+import { FakeRedisConnections } from './fake-redis';
 
 export const TEST_SESSION_SECRET =
   process.env.SESSION_SECRET ?? 'test-session-secret-that-is-long-enough';
 
 export async function createTestApp(): Promise<NestFastifyApplication> {
-  const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
+  // Realtime delivery is exercised with an in-process bus: a test should not
+  // need a Redis server, and the real client retries forever by design.
+  const redis = new FakeRedisConnections();
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(RedisConnections)
+    .useValue(redis)
+    .overrideProvider(REDIS_PUBLISHER)
+    .useValue(redis.publisher)
+    .overrideProvider(REDIS_SUBSCRIBER)
+    .useValue(redis.subscriber)
+    .compile();
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter(), {
     rawBody: true,
   });

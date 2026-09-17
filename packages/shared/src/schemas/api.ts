@@ -14,6 +14,7 @@ import {
   positiveCentsSchema,
   quantitySchema,
   shortCodeSchema,
+  stockStatusSchema,
   teamCodeSchema,
   uuidSchema,
 } from './primitives';
@@ -92,8 +93,6 @@ export const redeemRequestSchema = z.object({
   // L5: staff confirms the identification check for alcoholic items.
   ageChecked: z.boolean().default(false),
 });
-
-export const stockStatusSchema = z.enum(['IN_STOCK', 'LOW', 'SOLD_OUT']);
 
 /** A product as the market screen sees it (spec 4.3). */
 export const marketProductSchema = z.object({

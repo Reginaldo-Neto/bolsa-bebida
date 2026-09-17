@@ -4,6 +4,7 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { ParticipantsModule } from '../participants/participants.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { QuotesModule } from '../quotes/quotes.module';
+import { RealtimeModule } from '../realtime/realtime.module';
 import { VouchersModule } from '../vouchers/vouchers.module';
 import { ExpiryService } from './expiry.service';
 import { OrdersController } from './orders.controller';
@@ -19,6 +20,7 @@ import { PaymentWebhookController } from './payment-webhook.controller';
     VouchersModule,
     ParticipantsModule,
     PaymentsModule,
+    RealtimeModule,
   ],
   controllers: [OrdersController, PaymentWebhookController],
   providers: [OrdersService, ExpiryService, PaymentPollerService],

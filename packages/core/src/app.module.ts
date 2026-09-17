@@ -8,6 +8,7 @@ import { MarketModule } from './modules/market/market.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ParticipantsModule } from './modules/participants/participants.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { QuotesModule } from './modules/quotes/quotes.module';
     MarketModule,
     QuotesModule,
     OrdersModule,
+    RealtimeGatewayModule,
   ],
   controllers: [HealthController],
 })

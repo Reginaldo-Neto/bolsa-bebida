@@ -51,3 +51,8 @@ export { QuotesService } from './modules/quotes/quotes.service';
 export { VouchersModule } from './modules/vouchers/vouchers.module';
 export { VouchersService } from './modules/vouchers/vouchers.service';
 export { VoucherSignerService, type VoucherQr } from './modules/vouchers/voucher-signer.service';
+
+export { RealtimeModule } from './modules/realtime/realtime.module';
+export { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.module';
+export { RealtimePublisher } from './modules/realtime/realtime.publisher';
+export { RealtimeGateway } from './modules/realtime/realtime.gateway';
