@@ -5,6 +5,7 @@ import { BottomNav } from './components/chrome';
 import { Spinner } from './components/ui';
 import { ApiError, api } from './lib/api';
 import { useCart } from './lib/store';
+import { AdminApp } from './routes/admin';
 import { CartScreen } from './routes/cart';
 import { CheckoutScreen } from './routes/checkout';
 import { JoinScreen } from './routes/join';
@@ -12,6 +13,7 @@ import { MarketScreen } from './routes/market';
 import { PaymentScreen } from './routes/payment';
 import { PricesScreen } from './routes/prices';
 import { PublicScreen } from './routes/screen';
+import { StaffApp } from './routes/staff';
 import { HelpScreen, NotFoundScreen, RankingScreen } from './routes/static-pages';
 import { VoucherDetailScreen, VouchersScreen } from './routes/vouchers';
 
@@ -91,6 +93,10 @@ export function App(): React.JSX.Element {
       {/* Public, sessionless surfaces. */}
       <Route path="/screen" element={<PublicScreen />} />
       <Route path="/prices" element={<PricesScreen />} />
+
+      {/* Behind a staff session, not a participant one. */}
+      <Route path="/staff" element={<StaffApp />} />
+      <Route path="/admin" element={<AdminApp />} />
 
       <Route element={<ParticipantArea />}>
         <Route index element={<MarketScreen />} />

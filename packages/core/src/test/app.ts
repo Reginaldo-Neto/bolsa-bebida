@@ -121,13 +121,16 @@ export async function seedEvent(
   return { eventId, groupId, products };
 }
 
-/** Extracts the session cookie from a join response, for later requests. */
-export function sessionCookieFrom(headers: Record<string, unknown>): string {
+/** Extracts a session cookie from a response, for use on later requests. */
+export function sessionCookieFrom(
+  headers: Record<string, unknown>,
+  name: 'bb_session' | 'bb_staff' = 'bb_session',
+): string {
   const raw = headers['set-cookie'];
   const cookies = Array.isArray(raw) ? raw : [String(raw)];
-  const session = cookies.find((value) => value.startsWith('bb_session='));
+  const session = cookies.find((value) => value.startsWith(`${name}=`));
   if (!session) {
-    throw new Error('join did not set a session cookie');
+    throw new Error(`response did not set a ${name} cookie`);
   }
   return session.split(';')[0] ?? '';
 }

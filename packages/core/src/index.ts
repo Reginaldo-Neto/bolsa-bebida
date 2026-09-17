@@ -56,3 +56,14 @@ export { RealtimeModule } from './modules/realtime/realtime.module';
 export { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.module';
 export { RealtimePublisher } from './modules/realtime/realtime.publisher';
 export { RealtimeGateway } from './modules/realtime/realtime.gateway';
+
+export { AuditModule } from './modules/audit/audit.module';
+export { AuditService } from './modules/audit/audit.service';
+export { AuthModule } from './modules/auth/auth.module';
+export { AuthService, type StaffContext } from './modules/auth/auth.service';
+export { StaffGuard, AdminOnly, currentStaff } from './modules/auth/staff.guard';
+export { StaffModule } from './modules/staff/staff.module';
+export { StaffService, type ScannedVoucher } from './modules/staff/staff.service';
+export { AdminModule } from './modules/admin/admin.module';
+export { AdminService } from './modules/admin/admin.service';
+export { ReportsService, toCsv, parseCsv } from './modules/admin/reports.service';

@@ -148,3 +148,79 @@ export const quoteResponseSchema = z.object({
 });
 
 export type QuoteResponse = z.infer<typeof quoteResponseSchema>;
+
+/** POST /auth/login (spec 10.1). */
+export const loginRequestSchema = z.object({
+  eventId: uuidSchema,
+  email: z.string().trim().toLowerCase().email(),
+  password: z.string().min(1),
+  /** Spec 3: mandatory for ADMIN, unused for STAFF. */
+  totp: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, 'codigo de 6 digitos')
+    .optional(),
+});
+
+export type LoginRequest = z.infer<typeof loginRequestSchema>;
+
+/** POST /admin/events/{id}/state (spec 10.1). */
+export const eventActionSchema = z.object({
+  action: z.enum(['OPEN', 'PAUSED', 'CLOSED_SALES', 'FINISHED', 'FIXED_PRICES', 'RESUME_PRICES']),
+});
+
+export type EventAction = z.infer<typeof eventActionSchema>;
+
+export const productInputSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  groupName: z.string().trim().min(1).max(60),
+  category: z.string().trim().max(40).optional(),
+  isAlcoholic: z.boolean(),
+  volumeMl: z.number().int().min(0).max(5000).optional(),
+  costCents: centsSchema,
+  basePriceCents: positiveCentsSchema,
+  minPriceCents: positiveCentsSchema,
+  maxPriceCents: positiveCentsSchema,
+  stockInitial: z.number().int().min(0).max(100000),
+  sortOrder: z.number().int().min(0).max(999).optional(),
+  imageUrl: z.string().url().optional(),
+});
+
+export type ProductInput = z.infer<typeof productInputSchema>;
+
+/** Spec 4.2: min <= base <= max is a hard rule; min >= cost is only a warning. */
+export const productCreateSchema = productInputSchema.refine(
+  (product) =>
+    product.minPriceCents <= product.basePriceCents &&
+    product.basePriceCents <= product.maxPriceCents,
+  { message: 'o preco base tem de estar entre o minimo e o maximo', path: ['basePriceCents'] },
+);
+
+export const productUpdateSchema = productInputSchema.partial();
+
+/** POST /admin/products/{id}/override (spec 4.7). */
+export const priceOverrideSchema = z.object({
+  priceCents: positiveCentsSchema,
+  /** How many ticks the pin lasts, counting from the next one. */
+  ticks: z.number().int().min(1).max(200),
+});
+
+/** POST /admin/products/{id}/stock-adjust (spec 4.2). */
+export const stockAdjustSchema = z.object({
+  delta: z
+    .number()
+    .int()
+    .refine((value) => value !== 0, 'indique uma quantidade'),
+  reason: z.string().trim().min(3).max(200),
+});
+
+/** POST /admin/orders/{id}/refund (spec 4.7). */
+export const refundSchema = z.object({
+  amountCents: positiveCentsSchema.optional(),
+  reason: z.string().trim().min(3).max(200),
+  /** Puts the unredeemed drinks back on sale. */
+  restock: z.boolean().default(true),
+});
+
+export const REPORT_TYPES = ['vendas', 'precos', 'levantamentos', 'reembolsos'] as const;
+export type ReportType = (typeof REPORT_TYPES)[number];

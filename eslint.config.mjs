@@ -49,7 +49,15 @@ export default tseslint.config(
     rules: reactHooks.configs.recommended.rules,
   },
   {
-    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.config.ts', '**/scripts/**/*.ts', '**/seed.ts'],
+    files: [
+      '**/*.test.ts',
+      '**/*.spec.ts',
+      '**/*.config.ts',
+      '**/scripts/**/*.ts',
+      '**/seed.ts',
+      // Command line tools whose whole job is to print.
+      '**/cli/**/*.ts',
+    ],
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

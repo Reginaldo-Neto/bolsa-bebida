@@ -3,11 +3,15 @@ import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
 import { parseEnv } from './config/env';
 import { HealthController } from './health.controller';
+import { AdminModule } from './modules/admin/admin.module';
+import { AuditModule } from './modules/audit/audit.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/events/events.module';
 import { MarketModule } from './modules/market/market.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ParticipantsModule } from './modules/participants/participants.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { StaffModule } from './modules/staff/staff.module';
 import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.module';
 
 @Module({
@@ -22,11 +26,15 @@ import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.modul
       validate: parseEnv,
     }),
     CommonModule,
+    AuditModule,
+    AuthModule,
     EventsModule,
     ParticipantsModule,
     MarketModule,
     QuotesModule,
     OrdersModule,
+    StaffModule,
+    AdminModule,
     RealtimeGatewayModule,
   ],
   controllers: [HealthController],
