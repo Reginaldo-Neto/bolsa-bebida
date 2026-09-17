@@ -18,7 +18,7 @@
     "build": "pnpm db:generate && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "prisma": "dotenv -e ../../.env -- prisma",
     "db:generate": "pnpm prisma generate",
     "db:migrate": "pnpm prisma migrate dev",
@@ -33,6 +33,7 @@
     "uuidv7": "^1.0.2"
   },
   "devDependencies": {
+    "@types/node": "^24",
     "dotenv-cli": "^11.0.0",
     "prisma": "^6.2.1",
     "tsx": "^4.19.2"

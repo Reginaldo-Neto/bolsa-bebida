@@ -6,6 +6,7 @@ settings:
 
 overrides:
   fastify: 5.12.5
+  typescript: 5.9.3
 
 importers:
 
@@ -33,7 +34,7 @@ importers:
         specifier: ^2.10.13
         version: 2.10.13
       typescript:
-        specifier: ^5.9.3
+        specifier: 5.9.3
         version: 5.9.3
       typescript-eslint:
         specifier: ^8.70.0
@@ -107,7 +108,7 @@ importers:
         version: 12.0.3(@swc/core@1.16.2)(@types/node@24.13.5)(prettier@3.9.7)
       '@nestjs/schematics':
         specifier: ^12.0.3
-        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@6.0.3)
+        version: 12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@5.9.3)
       '@nestjs/testing':
         specifier: ^12.0.3
         version: 12.0.3(@nestjs/common@12.0.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@12.0.3(@nestjs/common@12.0.3(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))
@@ -131,17 +132,20 @@ importers:
         version: link:../shared
       '@prisma/client':
         specifier: ^6.2.1
-        version: 6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)
+        version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       uuidv7:
         specifier: ^1.0.2
         version: 1.2.1
     devDependencies:
+      '@types/node':
+        specifier: ^24
+        version: 24.13.5
       dotenv-cli:
         specifier: ^11.0.0
         version: 11.0.0
       prisma:
         specifier: ^6.2.1
-        version: 6.19.3(typescript@6.0.3)
+        version: 6.19.3(typescript@5.9.3)
       tsx:
         specifier: ^4.19.2
         version: 4.23.13
@@ -758,7 +762,7 @@ packages:
     engines: {node: ^22.22.3 || ^24.15.0 || >=26.0.0}
     peerDependencies:
       prettier: ^3.0.0
-      typescript: '>=6.0.0'
+      typescript: 5.9.3
     peerDependenciesMeta:
       prettier:
         optional: true
@@ -805,7 +809,7 @@ packages:
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
-      typescript: '>=5.1.0'
+      typescript: 5.9.3
     peerDependenciesMeta:
       prisma:
         optional: true
@@ -1090,20 +1094,20 @@ packages:
     peerDependencies:
       '@typescript-eslint/parser': ^8.70.0
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/parser@8.70.0':
     resolution: {integrity: sha512-zYvrmj9Yxd63UGaXw+kdt6A0F0s0qveJyuatIM77bYC2DE4pgmg7a50u8LR7PRtXd0x+h+Tl3eXabGm06SWd3Q==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/project-service@8.70.0':
     resolution: {integrity: sha512-hFHbTNqhU9G+2eKFXCBVb1tjFT/LceiJ4+HfLO4pTpDI0KHi6iajpcFFkaSQ9gXmCh7n82A0PthaayEdN6mspQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/scope-manager@8.70.0':
     resolution: {integrity: sha512-8nP3Kwh5hlgZ4FicGvmznAmJe8UL4sdU8tLukrPaMuQmDuk4Y8xYfzu/aYZW4xT2JCgc7H/TpDI5cGlxcWJSqQ==}
@@ -1113,14 +1117,14 @@ packages:
     resolution: {integrity: sha512-adnkeeNq9Sq1sUf4+FRVc0KdgYghzsgFpZSQVZVvY0LCuUuN0FnQgyGzCJeC4fW1cdXseBAjU2EOqUIjbNcZUw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/type-utils@8.70.0':
     resolution: {integrity: sha512-NUMKIhYVaVIVLnRL9CRt+VVcuLgSHUCpXn4/+K8wql+vdInUzvx8BjUO1oJ7cG9shjFJKtF8F8Hh2kCh3/KBVw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/types@8.70.0':
     resolution: {integrity: sha512-asTOIYhDg4zdzOScCyaytrsV3cR6B4ecPQlXw/dJIm7J/MZTtCtfVII9JD8Geh4jTCrK/Xe6cg5UevoleMcoJQ==}
@@ -1130,14 +1134,14 @@ packages:
     resolution: {integrity: sha512-d9NmHMPEKQ7QCLLm1jI3zmoQBwT5KwFYjXBJ9ymZfKCUU+5rmTRykKAFvH5Qn/ZCds3CEAFS9OC9M/jkl0X2bA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/utils@8.70.0':
     resolution: {integrity: sha512-oZmtKJz/4fufZ2p3+Cn3ijEojcdfR+1zYDH2xKYrEly0dR/Q/1xUPRCOlKGxod78nWlU2UnDe09GZ3TaknBFGA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   '@typescript-eslint/visitor-keys@8.70.0':
     resolution: {integrity: sha512-BoC8PiO4Hkdo0TVJh9Ntxr5MxPDI7/oFsrygN5ADelFSeXG/qgNuucIGA+L5Z6JpPTE/uRfcTWtscjbUaufepQ==}
@@ -1984,7 +1988,7 @@ packages:
     engines: {node: '>=18.18'}
     hasBin: true
     peerDependencies:
-      typescript: '>=5.1.0'
+      typescript: 5.9.3
     peerDependenciesMeta:
       typescript:
         optional: true
@@ -2204,7 +2208,7 @@ packages:
     resolution: {integrity: sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA==}
     engines: {node: '>=18.12'}
     peerDependencies:
-      typescript: '>=4.8.4'
+      typescript: 5.9.3
 
   tsconfig-paths@4.2.0:
     resolution: {integrity: sha512-NoZ4roiN7LnbKn9QqE1amc9DJfzvZXxF4xDavcOWt1BPkdx+m+0gJuPM+S0vCe7zTJMYUP0R8pO2XMr+Y8oLIg==}
@@ -2231,15 +2235,10 @@ packages:
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0 || ^10.0.0
-      typescript: '>=4.8.4 <6.1.0'
+      typescript: 5.9.3
 
   typescript@5.9.3:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
-  typescript@6.0.3:
-    resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -2864,7 +2863,7 @@ snapshots:
       '@angular-devkit/schematics': 22.1.8(chokidar@5.0.0)
       '@angular-devkit/schematics-cli': 22.1.8(@types/node@24.13.5)(chokidar@5.0.0)
       '@inquirer/prompts': 8.7.2(@types/node@24.13.5)
-      '@nestjs/schematics': 12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@6.0.3)
+      '@nestjs/schematics': 12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@5.9.3)
       ansis: 4.4.0
       chokidar: 5.0.0
       cli-table3: 0.6.5
@@ -2873,7 +2872,7 @@ snapshots:
       node-emoji: 2.2.0
       ora: 9.4.1
       tsconfig-paths: 4.2.0
-      typescript: 6.0.3
+      typescript: 5.9.3
     optionalDependencies:
       '@swc/core': 1.16.2
     transitivePeerDependencies:
@@ -2934,14 +2933,14 @@ snapshots:
     optionalDependencies:
       '@fastify/static': 10.1.4
 
-  '@nestjs/schematics@12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@6.0.3)':
+  '@nestjs/schematics@12.0.3(chokidar@5.0.0)(prettier@3.9.7)(typescript@5.9.3)':
     dependencies:
       '@angular-devkit/core': 22.1.8(chokidar@5.0.0)
       '@angular-devkit/schematics': 22.1.8(chokidar@5.0.0)
       comment-json: 5.0.0
       jsonc-parser: 3.3.1
       pluralize: 8.0.0
-      typescript: 6.0.3
+      typescript: 5.9.3
     optionalDependencies:
       prettier: 3.9.7
     transitivePeerDependencies:
@@ -2972,10 +2971,10 @@ snapshots:
 
   '@pinojs/redact@0.4.0': {}
 
-  '@prisma/client@6.19.3(prisma@6.19.3(typescript@6.0.3))(typescript@6.0.3)':
+  '@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)':
     optionalDependencies:
-      prisma: 6.19.3(typescript@6.0.3)
-      typescript: 6.0.3
+      prisma: 6.19.3(typescript@5.9.3)
+      typescript: 5.9.3
 
   '@prisma/config@6.19.3':
     dependencies:
@@ -4071,12 +4070,12 @@ snapshots:
 
   prettier@3.9.7: {}
 
-  prisma@6.19.3(typescript@6.0.3):
+  prisma@6.19.3(typescript@5.9.3):
     dependencies:
       '@prisma/config': 6.19.3
       '@prisma/engines': 6.19.3
     optionalDependencies:
-      typescript: 6.0.3
+      typescript: 5.9.3
     transitivePeerDependencies:
       - magicast
 
@@ -4301,8 +4300,6 @@ snapshots:
       - supports-color
 
   typescript@5.9.3: {}
-
-  typescript@6.0.3: {}
 
   uid@2.0.2:
     dependencies:
