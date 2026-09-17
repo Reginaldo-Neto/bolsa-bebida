@@ -30,7 +30,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.config.ts', '**/scripts/**/*.ts'],
+    files: ['**/*.test.ts', '**/*.spec.ts', '**/*.config.ts', '**/scripts/**/*.ts', '**/seed.ts'],
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
