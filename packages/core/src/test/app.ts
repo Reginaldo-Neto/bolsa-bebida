@@ -5,16 +5,11 @@ import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fa
 import { Test } from '@nestjs/testing';
 import { AppModule } from '../app.module';
 import { ProblemDetailsFilter } from '../common/problem.filter';
-import { TEST_DATABASE_URL } from './database';
 
-export const TEST_SESSION_SECRET = 'test-session-secret-that-is-long-enough';
+export const TEST_SESSION_SECRET =
+  process.env.SESSION_SECRET ?? 'test-session-secret-that-is-long-enough';
 
 export async function createTestApp(): Promise<NestFastifyApplication> {
-  process.env.DATABASE_URL = TEST_DATABASE_URL;
-  process.env.SESSION_SECRET = TEST_SESSION_SECRET;
-  process.env.NODE_ENV = 'test';
-  process.env.PAYMENT_PROVIDER = 'mock';
-
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] }).compile();
   const app = moduleRef.createNestApplication<NestFastifyApplication>(new FastifyAdapter(), {
     rawBody: true,

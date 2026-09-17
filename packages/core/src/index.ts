@@ -21,9 +21,12 @@ export { InventoryService, type StockMovement } from './modules/inventory/invent
 
 export { MarketModule } from './modules/market/market.module';
 export { MarketService, stockStatusOf, type PricePoint } from './modules/market/market.service';
+export { TickService, type TickResult } from './modules/market/tick.service';
 
 export { OrdersModule } from './modules/orders/orders.module';
 export { OrdersService, type OrderSummary } from './modules/orders/orders.service';
+export { ExpiryService } from './modules/orders/expiry.service';
+export { PaymentPollerService } from './modules/payments/payment-poller.service';
 
 export { ParticipantsModule } from './modules/participants/participants.module';
 export {

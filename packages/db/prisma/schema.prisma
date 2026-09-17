@@ -81,7 +81,9 @@ model Event {
   /// Spec 4.1: emergency switch. Prices return to base and the engine stops.
   fixedPrices Boolean @default(false) @map("fixed_prices")
   /// Sequence number of the last tick the worker completed.
-  currentTick Int     @default(0) @map("current_tick")
+  currentTick Int       @default(0) @map("current_tick")
+  /// When that tick ran. The next tick counts sales confirmed after it.
+  lastTickAt  DateTime? @map("last_tick_at") @db.Timestamptz(3)
 
   /// Validated by engineParamsSchema; versioned so old ticks stay explainable.
   engineParams Json @map("engine_params")

@@ -26,7 +26,9 @@ export default tseslint.config(
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      eqeqeq: ['error', 'always'],
+      // `x == null` is the idiomatic "null or undefined" check and is exactly
+      // what Prisma's nullable columns need; everything else must be strict.
+      eqeqeq: ['error', 'always', { null: 'ignore' }],
     },
   },
   {

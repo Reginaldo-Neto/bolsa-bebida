@@ -15,6 +15,9 @@ import { QuotesModule } from './modules/quotes/quotes.module';
       isGlobal: true,
       cache: true,
       envFilePath: ['../../.env'],
+      // Tests point at their own database through the environment; reading the
+      // developer's .env here would silently send them to the dev database.
+      ignoreEnvFile: process.env.NODE_ENV === 'test',
       validate: parseEnv,
     }),
     CommonModule,

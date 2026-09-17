@@ -28,6 +28,29 @@ corepack pnpm install
 corepack pnpm dev
 ```
 
+## Testes sem Docker
+
+Os testes de integração precisam de um PostgreSQL a sério: o que eles verificam são garantias
+transacionais (updates condicionais, locks de linha, restrições CHECK) e uma base de dados
+simulada não provaria nada sobre isso. Sem `DATABASE_URL_TEST` definido, fazem *skip*.
+
+Se não puder instalar Docker, há um PostgreSQL compilado para WASM:
+
+```bash
+corepack pnpm test:db
+```
+
+Noutro terminal:
+
+```bash
+DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:55432/postgres" corepack pnpm db:migrate:test
+DATABASE_URL_TEST="postgresql://postgres:postgres@127.0.0.1:55432/postgres?connection_limit=1&pgbouncer=true" corepack pnpm test
+```
+
+O `connection_limit=1&pgbouncer=true` é obrigatório: o servidor de sockets do PGlite multiplexa
+todas as ligações numa só instância, e os nomes de *prepared statements* colidem entre ligações.
+É a mesma limitação do pgbouncer em modo transação.
+
 ## Comandos
 
 | Comando | Função |
@@ -50,6 +73,7 @@ packages/
   shared/           Tipos, schemas Zod, dinheiro em cêntimos, máquinas de estado
   pricing-engine/   Motor de preços puro + vetores de teste
   db/               Prisma: schema, migrações e cliente
+  core/             Domínio NestJS partilhado pela API e pelo worker
   ui/               Componentes React partilhados
 research/
   simulator/        Python: simulação baseada em agentes para calibrar o motor
@@ -59,7 +83,12 @@ infra/
 ```
 
 As dependências apontam sempre para dentro: `shared` não conhece ninguém, o motor só conhece
-`shared`, e as apps conhecem tudo. O motor de preços não toca em base de dados nem na rede.
+`shared`, o `core` conhece os três pacotes abaixo dele, e as apps são apenas arranque de
+processo. O motor de preços não toca em base de dados nem na rede.
+
+O domínio vive em `packages/core` e não dentro da API porque o worker precisa exatamente da
+mesma lógica de liquidação de pagamentos e de stock. A alternativa seria o worker ter a sua
+própria cópia, que mais cedo ou mais tarde divergiria.
 
 ## Regras que o código tem de respeitar
 

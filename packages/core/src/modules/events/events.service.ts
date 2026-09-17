@@ -18,6 +18,7 @@ export interface EventContext {
   status: EventStatus;
   fixedPrices: boolean;
   currentTick: number;
+  lastTickAt: Date | null;
   timezone: string;
   engineParams: EngineParams;
   limits: ReturnType<typeof parseEventLimits>;
@@ -39,6 +40,7 @@ export class EventsService {
       status: event.status,
       fixedPrices: event.fixedPrices,
       currentTick: event.currentTick,
+      lastTickAt: event.lastTickAt,
       timezone: event.timezone,
       engineParams: parseEngineParams(event.engineParams),
       limits: parseEventLimits(event.limits as EventLimitsInput),

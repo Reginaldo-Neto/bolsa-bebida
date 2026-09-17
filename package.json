@@ -16,7 +16,10 @@
     "typecheck": "turbo run typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "turbo run lint typecheck test"
+    "check": "turbo run lint typecheck test",
+    "test:db": "node scripts/test-database.mjs",
+    "test:db:fresh": "node scripts/test-database.mjs --fresh",
+    "db:migrate:test": "pnpm --filter @bolsa/db exec prisma migrate deploy"
   },
   "pnpm": {
     "overrides": {
@@ -25,6 +28,8 @@
     }
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite-socket": "^0.2.11",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.5",
     "@vitest/coverage-v8": "^5.0.1",
