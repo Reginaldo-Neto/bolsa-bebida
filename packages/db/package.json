@@ -16,11 +16,11 @@
   ],
   "scripts": {
     "build": "pnpm db:generate && tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "pnpm db:generate && tsc -p tsconfig.json --noEmit",
     "lint": "eslint src",
     "test": "vitest run --passWithNoTests",
     "prisma": "dotenv -e ../../.env -- prisma",
-    "db:generate": "pnpm prisma generate",
+    "db:generate": "prisma generate",
     "db:migrate": "pnpm prisma migrate dev",
     "db:deploy": "pnpm prisma migrate deploy",
     "db:push": "pnpm prisma db push",

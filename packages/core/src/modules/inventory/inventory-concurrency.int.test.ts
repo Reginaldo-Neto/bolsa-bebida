@@ -2,7 +2,12 @@ import type { PrismaClient } from '@bolsa/db';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterAll, beforeAll, beforeEach, expect, it } from 'vitest';
 import { createTestApp, seedEvent, sessionCookieFrom, type SeededEvent } from '../../test/app';
-import { describeWithDatabase, resetDatabase, testPrismaClient } from '../../test/database';
+import {
+  describeWithDatabase,
+  resetDatabase,
+  TEST_DATABASE_IS_SERIALIZED,
+  testPrismaClient,
+} from '../../test/database';
 
 /**
  * F2 acceptance (spec 13.1): 200 simultaneous purchases must never leave the
@@ -65,10 +70,15 @@ describeWithDatabase('stock under concurrency', () => {
     const accepted = results.filter((result) => result.statusCode === 201);
     const refused = results.filter((result) => result.statusCode === 409);
 
+    // The guarantee of spec 13.1: exactly as many sales as there were drinks.
     expect(accepted).toHaveLength(50);
-    expect(refused).toHaveLength(150);
     for (const result of refused) {
       expect(['insufficient-stock', 'product-sold-out']).toContain(result.json().code);
+    }
+
+    if (!TEST_DATABASE_IS_SERIALIZED) {
+      // Every other participant got a clear refusal rather than an error.
+      expect(refused).toHaveLength(150);
     }
 
     const product = await client.product.findUniqueOrThrow({ where: { id: fino?.id } });

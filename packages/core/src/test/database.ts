@@ -18,6 +18,19 @@ export const describeWithDatabase: typeof describe = TEST_DATABASE_URL
   ? describe
   : (describe.skip as typeof describe);
 
+/**
+ * True when the test database is the WASM PGlite of scripts/test-database.mjs,
+ * which funnels every connection through one instance and therefore has to run
+ * with connection_limit=1.
+ *
+ * Correctness assertions hold either way. What does not hold is throughput:
+ * under a few hundred simultaneous requests, Prisma's pool timeout fires and
+ * some requests get no answer at all. Asserting on how many requests were
+ * cleanly refused only makes sense against a server that can actually serve
+ * them in parallel, which is what CI provides.
+ */
+export const TEST_DATABASE_IS_SERIALIZED = Boolean(TEST_DATABASE_URL?.includes('pgbouncer=true'));
+
 export function testPrismaClient(): PrismaClient {
   return createPrismaClient({ databaseUrl: TEST_DATABASE_URL });
 }
