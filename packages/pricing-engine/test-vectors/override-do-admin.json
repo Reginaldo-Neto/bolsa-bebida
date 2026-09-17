@@ -1,0 +1,159 @@
+{
+  "name": "override-do-admin",
+  "description": "O admin fixa o preco do fino em 2,20 EUR ate ao tick 3. Enquanto dura, o preco nao se move e o produto sai da renormalizacao; a partir do tick 4 volta a flutuar.",
+  "params": {
+    "tickSeconds": 120,
+    "ewmaLambda": 0.5,
+    "demandSensitivity": 0.1,
+    "meanReversion": 0.05,
+    "stockPressure": 0.05,
+    "lowStockThreshold": 0.2,
+    "maxStepPct": 0.08,
+    "roundingCents": 10,
+    "renormalize": true
+  },
+  "products": [
+    {
+      "productId": "fino",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true,
+      "manualOverride": {
+        "price": 220,
+        "untilTick": 3
+      }
+    },
+    {
+      "productId": "imperial",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    },
+    {
+      "productId": "cidra",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    }
+  ],
+  "steps": [
+    {
+      "tick": 1,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 5,
+        "cidra": 5
+      },
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 150,
+          "cidra": 150
+        },
+        "smoothedDemand": {
+          "fino": 10,
+          "imperial": 2.5,
+          "cidra": 2.5
+        }
+      }
+    },
+    {
+      "tick": 2,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 5,
+        "cidra": 5
+      },
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 150,
+          "cidra": 150
+        },
+        "smoothedDemand": {
+          "fino": 15,
+          "imperial": 3.75,
+          "cidra": 3.75
+        }
+      }
+    },
+    {
+      "tick": 3,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 5,
+        "cidra": 5
+      },
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 150,
+          "cidra": 150
+        },
+        "smoothedDemand": {
+          "fino": 17.5,
+          "imperial": 4.375,
+          "cidra": 4.375
+        }
+      }
+    },
+    {
+      "tick": 4,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 5,
+        "cidra": 5
+      },
+      "expected": {
+        "prices": {
+          "fino": 200,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 18.75,
+          "imperial": 4.6875,
+          "cidra": 4.6875
+        }
+      }
+    },
+    {
+      "tick": 5,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 5,
+        "cidra": 5
+      },
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 19.375,
+          "imperial": 4.84375,
+          "cidra": 4.84375
+        }
+      }
+    }
+  ]
+}

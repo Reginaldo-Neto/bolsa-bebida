@@ -1,0 +1,695 @@
+{
+  "name": "festa-parada",
+  "description": "Depois de uma rajada de vendas a festa para. As quotas de procura sobrevivem a paragem (so o nivel absoluto decai), por isso os precos ainda se afastam do base durante cerca de 14 ticks antes de a reversao a media os trazer de volta. E o comportamento da formula da seccao 5.3: calibrar alpha e beta no simulador se o transitorio for demasiado agressivo.",
+  "params": {
+    "tickSeconds": 120,
+    "ewmaLambda": 0.5,
+    "demandSensitivity": 0.1,
+    "meanReversion": 0.05,
+    "stockPressure": 0.05,
+    "lowStockThreshold": 0.2,
+    "maxStepPct": 0.08,
+    "roundingCents": 10,
+    "renormalize": true
+  },
+  "products": [
+    {
+      "productId": "fino",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 200,
+      "smoothedDemand": 12,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    },
+    {
+      "productId": "imperial",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 130,
+      "smoothedDemand": 2,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    },
+    {
+      "productId": "cidra",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 120,
+      "smoothedDemand": 1,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    }
+  ],
+  "steps": [
+    {
+      "tick": 1,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 120,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 6,
+          "imperial": 1,
+          "cidra": 0.5
+        }
+      }
+    },
+    {
+      "tick": 2,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 110,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 3,
+          "imperial": 0.5,
+          "cidra": 0.25
+        }
+      }
+    },
+    {
+      "tick": 3,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 1.5,
+          "imperial": 0.25,
+          "cidra": 0.125
+        }
+      }
+    },
+    {
+      "tick": 4,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.75,
+          "imperial": 0.125,
+          "cidra": 0.0625
+        }
+      }
+    },
+    {
+      "tick": 5,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.375,
+          "imperial": 0.0625,
+          "cidra": 0.03125
+        }
+      }
+    },
+    {
+      "tick": 6,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.1875,
+          "imperial": 0.03125,
+          "cidra": 0.015625
+        }
+      }
+    },
+    {
+      "tick": 7,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 210,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.09375,
+          "imperial": 0.015625,
+          "cidra": 0.0078125
+        }
+      }
+    },
+    {
+      "tick": 8,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.046875,
+          "imperial": 0.0078125,
+          "cidra": 0.00390625
+        }
+      }
+    },
+    {
+      "tick": 9,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 230,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.0234375,
+          "imperial": 0.00390625,
+          "cidra": 0.001953125
+        }
+      }
+    },
+    {
+      "tick": 10,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 250,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.01171875,
+          "imperial": 0.001953125,
+          "cidra": 0.0009765625
+        }
+      }
+    },
+    {
+      "tick": 11,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 250,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.005859375,
+          "imperial": 0.0009765625,
+          "cidra": 0.00048828125
+        }
+      }
+    },
+    {
+      "tick": 12,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 250,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.0029296875,
+          "imperial": 0.00048828125,
+          "cidra": 0.000244140625
+        }
+      }
+    },
+    {
+      "tick": 13,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 250,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.00146484375,
+          "imperial": 0.000244140625,
+          "cidra": 0.0001220703125
+        }
+      }
+    },
+    {
+      "tick": 14,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 240,
+          "imperial": 100,
+          "cidra": 100
+        },
+        "smoothedDemand": {
+          "fino": 0.000732421875,
+          "imperial": 0.0001220703125,
+          "cidra": 0.00006103515625
+        }
+      }
+    },
+    {
+      "tick": 15,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 240,
+          "imperial": 110,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 0.0003662109375,
+          "imperial": 0.00006103515625,
+          "cidra": 0.000030517578125
+        }
+      }
+    },
+    {
+      "tick": 16,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 230,
+          "imperial": 110,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 0.00018310546875,
+          "imperial": 0.000030517578125,
+          "cidra": 0.0000152587890625
+        }
+      }
+    },
+    {
+      "tick": 17,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 230,
+          "imperial": 110,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 0.000091552734375,
+          "imperial": 0.0000152587890625,
+          "cidra": 0.00000762939453125
+        }
+      }
+    },
+    {
+      "tick": 18,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 110,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 0.0000457763671875,
+          "imperial": 0.00000762939453125,
+          "cidra": 0.000003814697265625
+        }
+      }
+    },
+    {
+      "tick": 19,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 110,
+          "cidra": 110
+        },
+        "smoothedDemand": {
+          "fino": 0.00002288818359375,
+          "imperial": 0.000003814697265625,
+          "cidra": 0.0000019073486328125
+        }
+      }
+    },
+    {
+      "tick": 20,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 220,
+          "imperial": 120,
+          "cidra": 120
+        },
+        "smoothedDemand": {
+          "fino": 0.000011444091796875,
+          "imperial": 0.0000019073486328125,
+          "cidra": 9.5367431640625e-7
+        }
+      }
+    },
+    {
+      "tick": 21,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 210,
+          "imperial": 120,
+          "cidra": 120
+        },
+        "smoothedDemand": {
+          "fino": 0.0000057220458984375,
+          "imperial": 9.5367431640625e-7,
+          "cidra": 4.76837158203125e-7
+        }
+      }
+    },
+    {
+      "tick": 22,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 210,
+          "imperial": 120,
+          "cidra": 120
+        },
+        "smoothedDemand": {
+          "fino": 0.00000286102294921875,
+          "imperial": 4.76837158203125e-7,
+          "cidra": 2.384185791015625e-7
+        }
+      }
+    },
+    {
+      "tick": 23,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 210,
+          "imperial": 120,
+          "cidra": 120
+        },
+        "smoothedDemand": {
+          "fino": 0.000001430511474609375,
+          "imperial": 2.384185791015625e-7,
+          "cidra": 1.1920928955078125e-7
+        }
+      }
+    },
+    {
+      "tick": 24,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 200,
+          "imperial": 120,
+          "cidra": 120
+        },
+        "smoothedDemand": {
+          "fino": 7.152557373046875e-7,
+          "imperial": 1.1920928955078125e-7,
+          "cidra": 5.960464477539063e-8
+        }
+      }
+    },
+    {
+      "tick": 25,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 200,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 3.5762786865234375e-7,
+          "imperial": 5.960464477539063e-8,
+          "cidra": 2.9802322387695312e-8
+        }
+      }
+    },
+    {
+      "tick": 26,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 200,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 1.7881393432617188e-7,
+          "imperial": 2.9802322387695312e-8,
+          "cidra": 1.4901161193847656e-8
+        }
+      }
+    },
+    {
+      "tick": 27,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 8.940696716308594e-8,
+          "imperial": 1.4901161193847656e-8,
+          "cidra": 7.450580596923828e-9
+        }
+      }
+    },
+    {
+      "tick": 28,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 4.470348358154297e-8,
+          "imperial": 7.450580596923828e-9,
+          "cidra": 3.725290298461914e-9
+        }
+      }
+    },
+    {
+      "tick": 29,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 2.2351741790771484e-8,
+          "imperial": 3.725290298461914e-9,
+          "cidra": 1.862645149230957e-9
+        }
+      }
+    },
+    {
+      "tick": 30,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 1.1175870895385742e-8,
+          "imperial": 1.862645149230957e-9,
+          "cidra": 9.313225746154785e-10
+        }
+      }
+    },
+    {
+      "tick": 31,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 190,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 5.587935447692871e-9,
+          "imperial": 9.313225746154785e-10,
+          "cidra": 4.656612873077393e-10
+        }
+      }
+    },
+    {
+      "tick": 32,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 2.7939677238464355e-9,
+          "imperial": 4.656612873077393e-10,
+          "cidra": 2.3283064365386963e-10
+        }
+      }
+    },
+    {
+      "tick": 33,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 130,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 1.3969838619232178e-9,
+          "imperial": 2.3283064365386963e-10,
+          "cidra": 1.1641532182693481e-10
+        }
+      }
+    },
+    {
+      "tick": 34,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 6.984919309616089e-10,
+          "imperial": 1.1641532182693481e-10,
+          "cidra": 5.820766091346741e-11
+        }
+      }
+    },
+    {
+      "tick": 35,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 3.4924596548080444e-10,
+          "imperial": 5.820766091346741e-11,
+          "cidra": 2.9103830456733704e-11
+        }
+      }
+    },
+    {
+      "tick": 36,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 1.7462298274040222e-10,
+          "imperial": 2.9103830456733704e-11,
+          "cidra": 1.4551915228366852e-11
+        }
+      }
+    },
+    {
+      "tick": 37,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 180,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 8.731149137020111e-11,
+          "imperial": 1.4551915228366852e-11,
+          "cidra": 7.275957614183426e-12
+        }
+      }
+    },
+    {
+      "tick": 38,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 4.3655745685100555e-11,
+          "imperial": 7.275957614183426e-12,
+          "cidra": 3.637978807091713e-12
+        }
+      }
+    },
+    {
+      "tick": 39,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 2.1827872842550278e-11,
+          "imperial": 3.637978807091713e-12,
+          "cidra": 1.8189894035458565e-12
+        }
+      }
+    },
+    {
+      "tick": 40,
+      "paidUnits": {},
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 1.0913936421275139e-11,
+          "imperial": 1.8189894035458565e-12,
+          "cidra": 9.094947017729282e-13
+        }
+      }
+    }
+  ]
+}

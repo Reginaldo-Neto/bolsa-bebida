@@ -104,6 +104,15 @@ export const DEFAULT_EVENT_LIMITS: EventLimits = {
   paymentTimeoutSeconds: PAYMENT_TIMEOUT_SECONDS,
 };
 
+/**
+ * Below this smoothed demand (units per tick) a group counts as having no
+ * sales at all. Spec 5.3 step 3 only handles an exact zero, but the EWMA decays
+ * geometrically and never reaches it, which would freeze the demand signal at
+ * its last shares forever and stop an idle market from returning to its base
+ * prices (invariant 5.5).
+ */
+export const DEMAND_EPSILON = 1e-3;
+
 /** Renormalisation epsilon of spec 5.3 step 10. */
 export const RENORMALIZE_EPSILON = 0.1;
 export const RENORMALIZE_MAX_ITERATIONS = 5;

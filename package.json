@@ -21,6 +21,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.5",
+    "@vitest/coverage-v8": "^5.0.1",
     "eslint": "^10.10.0",
     "pnpm": "9.15.4",
     "prettier": "^3.9.7",

@@ -2,10 +2,7 @@ import { FORBIDDEN_PRICE_WORDS } from '../constants';
 
 /** Lowercases and strips accents so "Promoção" matches "promocao". */
 export function normalizeText(text: string): string {
-  return text
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .toLowerCase();
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 }
 
 /**

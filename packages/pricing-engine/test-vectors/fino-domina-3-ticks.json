@@ -1,0 +1,115 @@
+{
+  "name": "fino-domina-3-ticks",
+  "description": "O fino leva metade da procura do grupo durante tres ticks. O preco do fino sobe e os substitutos (imperial e cidra) descem, mantendo o preco medio ponderado perto do base.",
+  "params": {
+    "tickSeconds": 120,
+    "ewmaLambda": 0.5,
+    "demandSensitivity": 0.1,
+    "meanReversion": 0.05,
+    "stockPressure": 0.05,
+    "lowStockThreshold": 0.2,
+    "maxStepPct": 0.08,
+    "roundingCents": 10,
+    "renormalize": true
+  },
+  "products": [
+    {
+      "productId": "fino",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    },
+    {
+      "productId": "imperial",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    },
+    {
+      "productId": "cidra",
+      "groupId": "cerveja-e-cidra",
+      "basePrice": 150,
+      "minPrice": 100,
+      "maxPrice": 250,
+      "currentPrice": 150,
+      "smoothedDemand": 0,
+      "stockInitial": 500,
+      "stockAvailable": 500,
+      "active": true
+    }
+  ],
+  "steps": [
+    {
+      "tick": 1,
+      "paidUnits": {
+        "fino": 15,
+        "imperial": 8,
+        "cidra": 7
+      },
+      "expected": {
+        "prices": {
+          "fino": 160,
+          "imperial": 150,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 7.5,
+          "imperial": 4,
+          "cidra": 3.5
+        }
+      }
+    },
+    {
+      "tick": 2,
+      "paidUnits": {
+        "fino": 18,
+        "imperial": 9,
+        "cidra": 9
+      },
+      "expected": {
+        "prices": {
+          "fino": 160,
+          "imperial": 140,
+          "cidra": 140
+        },
+        "smoothedDemand": {
+          "fino": 12.75,
+          "imperial": 6.5,
+          "cidra": 6.25
+        }
+      }
+    },
+    {
+      "tick": 3,
+      "paidUnits": {
+        "fino": 20,
+        "imperial": 10,
+        "cidra": 10
+      },
+      "expected": {
+        "prices": {
+          "fino": 170,
+          "imperial": 140,
+          "cidra": 130
+        },
+        "smoothedDemand": {
+          "fino": 16.375,
+          "imperial": 8.25,
+          "cidra": 8.125
+        }
+      }
+    }
+  ]
+}
