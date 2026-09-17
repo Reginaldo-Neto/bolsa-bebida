@@ -18,6 +18,11 @@
     "format:check": "prettier --check .",
     "check": "turbo run lint typecheck test"
   },
+  "pnpm": {
+    "overrides": {
+      "fastify": "5.12.5"
+    }
+  },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.13.5",
