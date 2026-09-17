@@ -1,0 +1,110 @@
+import { useQuery } from '@tanstack/react-query';
+import { useEffect } from 'react';
+import { Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import { BottomNav } from './components/chrome';
+import { Spinner } from './components/ui';
+import { ApiError, api } from './lib/api';
+import { useCart } from './lib/store';
+import { CartScreen } from './routes/cart';
+import { CheckoutScreen } from './routes/checkout';
+import { JoinScreen } from './routes/join';
+import { MarketScreen } from './routes/market';
+import { PaymentScreen } from './routes/payment';
+import { PricesScreen } from './routes/prices';
+import { PublicScreen } from './routes/screen';
+import { HelpScreen, NotFoundScreen, RankingScreen } from './routes/static-pages';
+import { VoucherDetailScreen, VouchersScreen } from './routes/vouchers';
+
+/** The QR Code at the venue points here; it only records which event this is. */
+function EnterEvent(): React.JSX.Element {
+  const { eventId } = useParams<{ eventId: string }>();
+  const setEventId = useCart((state) => state.setEventId);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (eventId) {
+      setEventId(eventId);
+    }
+    void navigate('/', { replace: true });
+  }, [eventId, setEventId, navigate]);
+
+  return <Spinner label="A entrar" />;
+}
+
+/**
+ * Everything behind the session. There is no login: either the cookie from
+ * joining is there, or the participant sees the entry screen again.
+ */
+function ParticipantArea(): React.JSX.Element {
+  const eventId = useCart((state) => state.eventId);
+
+  const snapshot = useQuery({
+    queryKey: ['market', eventId],
+    queryFn: () => api.snapshot(eventId ?? ''),
+    enabled: Boolean(eventId),
+  });
+
+  const me = useQuery({
+    queryKey: ['me'],
+    queryFn: api.me,
+    enabled: Boolean(eventId),
+    retry: (failureCount, error) =>
+      !(error instanceof ApiError && error.status === 401) && failureCount < 2,
+  });
+
+  if (!eventId) {
+    return (
+      <main className="grid min-h-dvh place-items-center p-6 text-center">
+        <div>
+          <h1 className="text-2xl font-bold">Leia o codigo QR no local</h1>
+          <p className="mt-3 text-muted">
+            A entrada no mercado faz-se pelo codigo QR afixado no bar ou no ecra da festa.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (me.isLoading || snapshot.isLoading) {
+    return <Spinner />;
+  }
+
+  if (me.isError) {
+    return <JoinScreen eventName={snapshot.data?.eventName ?? 'Bolsa de Bebidas'} />;
+  }
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      <div className="flex-1">
+        <Outlet />
+      </div>
+      <BottomNav />
+    </div>
+  );
+}
+
+export function App(): React.JSX.Element {
+  return (
+    <Routes>
+      <Route path="/e/:eventId" element={<EnterEvent />} />
+
+      {/* Public, sessionless surfaces. */}
+      <Route path="/screen" element={<PublicScreen />} />
+      <Route path="/prices" element={<PricesScreen />} />
+
+      <Route element={<ParticipantArea />}>
+        <Route index element={<MarketScreen />} />
+        <Route path="/carrinho" element={<CartScreen />} />
+        <Route path="/checkout" element={<CheckoutScreen />} />
+        <Route path="/pagamento/:orderId" element={<PaymentScreen />} />
+        <Route path="/vouchers" element={<VouchersScreen />} />
+        <Route path="/vouchers/:voucherId" element={<VoucherDetailScreen />} />
+        <Route path="/ranking" element={<RankingScreen />} />
+        <Route path="/ajuda" element={<HelpScreen />} />
+      </Route>
+
+      <Route path="/404" element={<NotFoundScreen />} />
+      <Route path="*" element={<Navigate to="/404" replace />} />
+    </Routes>
+  );
+}

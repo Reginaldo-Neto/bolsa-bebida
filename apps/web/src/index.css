@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+
+/**
+ * Spec 11.1: dark by default, at least WCAG AA, and readable at arm's length in
+ * a dark, noisy room. Every colour below is checked against --color-bg.
+ */
+@theme {
+  --color-bg: #0b0f14;
+  --color-surface: #151b23;
+  --color-raised: #1d252f;
+  --color-line: #2b3644;
+
+  --color-text: #f2f5f8;
+  /* 7.4:1 on --color-bg */
+  --color-muted: #9fb0c3;
+
+  /* Rise and fall. The arrow next to them is what carries the meaning for
+     anyone who cannot tell these two apart. */
+  --color-up: #3ddc97;
+  --color-down: #ff6b6b;
+
+  --color-accent: #5aa9ff;
+  --color-warning: #ffc857;
+
+  --font-sans:
+    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Spec 11.1: prices at 24px or more. */
+  --text-price: 1.75rem;
+  --text-price--line-height: 1.1;
+  --text-price-lg: 2.75rem;
+  --text-price-lg--line-height: 1;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-bg);
+    color-scheme: dark;
+    /* Stops iOS from zooming when a field is focused. */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    /* Safe areas: the bottom bar must clear the home indicator. */
+    padding-bottom: env(safe-area-inset-bottom);
+    overscroll-behavior-y: none;
+  }
+
+  /* Spec 11.1: every interactive target is at least 48x48. */
+  button,
+  a[role='button'],
+  input,
+  select {
+    min-height: 48px;
+  }
+
+  button {
+    font: inherit;
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Spec 11.1: animations of 300ms or less, and none at all for anyone who
+     asked their device to stop moving things. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* A short flash when a quote moves, so a change is noticed without the whole
+     list jumping around. */
+  @keyframes price-up {
+    from {
+      background-color: color-mix(in oklab, var(--color-up) 28%, transparent);
+    }
+    to {
+      background-color: transparent;
+    }
+  }
+  @keyframes price-down {
+    from {
+      background-color: color-mix(in oklab, var(--color-down) 28%, transparent);
+    }
+    to {
+      background-color: transparent;
+    }
+  }
+
+  .flash-up {
+    animation: price-up 300ms ease-out;
+  }
+  .flash-down {
+    animation: price-down 300ms ease-out;
+  }
+}

@@ -1,4 +1,5 @@
 import js from '@eslint/js';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
@@ -39,6 +40,13 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/consistent-type-imports': 'off',
     },
+  },
+  {
+    // Stale closures and missing dependencies are real bugs in a screen that
+    // updates from a socket, not style opinions.
+    files: ['apps/web/**/*.{ts,tsx}'],
+    plugins: { 'react-hooks': reactHooks },
+    rules: reactHooks.configs.recommended.rules,
   },
   {
     files: ['**/*.test.ts', '**/*.spec.ts', '**/*.config.ts', '**/scripts/**/*.ts', '**/seed.ts'],
