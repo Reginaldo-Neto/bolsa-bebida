@@ -3,8 +3,13 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "node16",
-    "moduleResolution": "node16",
+    // CommonJS with node10 resolution: NestJS 12 publishes ESM, and node16
+    // resolution refuses to require() it. Going full ESM would mean explicit
+    // .js suffixes on every relative import plus CJS interop risk with Prisma,
+    // BullMQ and socket.io. TypeScript is pinned to 5.9 in the root overrides,
+    // where node10 resolution is still supported.
+    "module": "commonjs",
+    "moduleResolution": "node",
 
     "strict": true,
     "noUncheckedIndexedAccess": true,
