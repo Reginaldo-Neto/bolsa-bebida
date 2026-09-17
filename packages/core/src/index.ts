@@ -1,0 +1,50 @@
+/**
+ * The domain of the Bolsa de Bebidas, shared by the API and the worker
+ * (spec 8.2). Keeping it in a package rather than inside one of the apps is
+ * what stops the worker from growing its own copy of settlement or stock logic.
+ */
+export { AppModule } from './app.module';
+export { HealthController } from './health.controller';
+
+export { CommonModule } from './common/common.module';
+export { PrismaService } from './common/prisma.service';
+export { ProblemDetailsFilter } from './common/problem.filter';
+export { ZodValidationPipe, zodPipe } from './common/zod.pipe';
+
+export { parseEnv, type Env } from './config/env';
+
+export { EventsModule } from './modules/events/events.module';
+export { EventsService, type EventContext } from './modules/events/events.service';
+
+export { InventoryModule } from './modules/inventory/inventory.module';
+export { InventoryService, type StockMovement } from './modules/inventory/inventory.service';
+
+export { MarketModule } from './modules/market/market.module';
+export { MarketService, stockStatusOf, type PricePoint } from './modules/market/market.service';
+
+export { OrdersModule } from './modules/orders/orders.module';
+export { OrdersService, type OrderSummary } from './modules/orders/orders.service';
+
+export { ParticipantsModule } from './modules/participants/participants.module';
+export {
+  ParticipantsService,
+  type ParticipantContext,
+} from './modules/participants/participants.service';
+export { ParticipantGuard, currentParticipant } from './modules/participants/participant.guard';
+
+export { PaymentsModule } from './modules/payments/payments.module';
+export { MockPaymentProvider } from './modules/payments/mock-payment.provider';
+export {
+  PAYMENT_PROVIDER,
+  PaymentProvider,
+  type PaymentRequest,
+  type PaymentResult,
+  type PaymentWebhookEvent,
+} from './modules/payments/payment-provider';
+
+export { QuotesModule } from './modules/quotes/quotes.module';
+export { QuotesService } from './modules/quotes/quotes.service';
+
+export { VouchersModule } from './modules/vouchers/vouchers.module';
+export { VouchersService } from './modules/vouchers/vouchers.service';
+export { VoucherSignerService, type VoucherQr } from './modules/vouchers/voucher-signer.service';

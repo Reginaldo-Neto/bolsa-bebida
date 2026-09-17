@@ -1,4 +1,7 @@
 import { randomBytes } from 'node:crypto';
+// Side-effect import: @fastify/cookie augments FastifyRequest and FastifyReply
+// with setCookie/unsignCookie, and the augmentation only loads if it is imported.
+import type {} from '@fastify/cookie';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 
 /**
