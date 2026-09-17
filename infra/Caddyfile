@@ -1,0 +1,29 @@
+# Caddy gives automatic HTTPS, which the PWA and the camera API of the staff
+# app both require. Set DOMAIN in the environment before deploying.
+{$DOMAIN:localhost} {
+	encode zstd gzip
+
+	# Security headers (spec 12.1, OWASP ASVS L2).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(self), microphone=(), geolocation=()"
+		-Server
+	}
+
+	handle /api/* {
+		reverse_proxy api:3000
+	}
+
+	handle /socket.io/* {
+		reverse_proxy api:3000
+	}
+
+	handle {
+		root * /srv/web
+		try_files {path} /index.html
+		file_server
+	}
+}

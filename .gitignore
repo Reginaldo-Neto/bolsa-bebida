@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Coverage and test artifacts
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+blob-report/
+
+# Editors and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python (research/simulator)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ipynb_checkpoints/
+research/simulator/out/
+
+# Prisma
+packages/db/prisma/*.db
+packages/db/prisma/*.db-journal
+
+# Secrets / keys
+*.pem
+keys/

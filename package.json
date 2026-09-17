@@ -1,0 +1,32 @@
+{
+  "name": "bolsa-bebidas",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plataforma de bolsa de bebidas para festas: precos dinamicos em tempo real",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "turbo run lint typecheck test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.13.5",
+    "eslint": "^10.10.0",
+    "pnpm": "9.15.4",
+    "prettier": "^3.9.7",
+    "turbo": "^2.10.13",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.1"
+  }
+}

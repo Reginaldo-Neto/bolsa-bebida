@@ -1,0 +1,42 @@
+name: bolsa-bebidas
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bolsa-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bolsa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bolsa}
+      POSTGRES_DB: ${POSTGRES_DB:-bolsa}
+      # Money and stock correctness depend on these; keep the defaults explicit.
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-bolsa} -d ${POSTGRES_DB:-bolsa}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: bolsa-redis
+    restart: unless-stopped
+    # appendonly keeps BullMQ jobs across a restart during the event.
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    ports:
+      - '${REDIS_PORT:-6379}:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres-data:
+  redis-data:
