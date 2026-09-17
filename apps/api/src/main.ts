@@ -16,6 +16,9 @@ async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter({ trustProxy: true, bodyLimit: 1_048_576 }),
+    // Payment webhooks are signed over the exact bytes received, so the raw
+    // body has to survive JSON parsing (spec 12.1).
+    { rawBody: true },
   );
 
   const config = app.get(ConfigService<Env, true>);

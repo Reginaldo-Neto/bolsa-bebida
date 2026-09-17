@@ -16,6 +16,30 @@ jobs:
   node:
     name: Lint, typecheck and test
     runs-on: ubuntu-latest
+
+    # Integration tests assert on transactional behaviour (conditional updates,
+    # row locks, CHECK constraints), so they need a real PostgreSQL. Without one
+    # they skip, and the F2 acceptance criteria would never actually run.
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: bolsa
+          POSTGRES_PASSWORD: bolsa
+          POSTGRES_DB: bolsa_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bolsa"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://bolsa:bolsa@localhost:5432/bolsa_test?schema=public
+      DATABASE_URL_TEST: postgresql://bolsa:bolsa@localhost:5432/bolsa_test?schema=public
+      SESSION_SECRET: ci-session-secret-that-is-long-enough-for-zod
+
     steps:
       - uses: actions/checkout@v4
 
@@ -30,6 +54,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Apply database migrations
+        run: pnpm --filter @bolsa/db exec prisma migrate deploy
 
       - name: Format check
         run: pnpm format:check

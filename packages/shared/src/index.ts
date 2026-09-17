@@ -8,3 +8,4 @@ export * from './domain/compliance';
 
 export * from './schemas/primitives';
 export * from './schemas/engine';
+export * from './schemas/api';
