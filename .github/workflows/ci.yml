@@ -42,3 +42,25 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  python:
+    name: Simulator parity (Python)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install simulator
+        working-directory: research/simulator
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e '.[dev]'
+
+      # Fails if the research engine and the production engine disagree on any
+      # shared test vector (spec 5.6).
+      - name: Test
+        working-directory: research/simulator
+        run: pytest -q

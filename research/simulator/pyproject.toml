@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bolsa-sim"
+version = "0.1.0"
+description = "Simulacao baseada em agentes e calibracao do motor de precos da Bolsa de Bebidas"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+# The engine port and the parity tests are stdlib only, so CI stays fast and
+# cannot break on a scientific-stack release. Analysis extras are opt-in.
+dev = ["pytest>=8.0"]
+sim = ["numpy>=1.26", "pandas>=2.1"]
+plots = ["matplotlib>=3.8"]
+
+[project.scripts]
+bolsa-sim = "bolsa_sim.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
