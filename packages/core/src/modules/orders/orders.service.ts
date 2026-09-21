@@ -14,6 +14,7 @@ import { InventoryService, type StockMovement } from '../inventory/inventory.ser
 import type { ParticipantContext } from '../participants/participants.service';
 import { ParticipantsService } from '../participants/participants.service';
 import { PAYMENT_PROVIDER, type PaymentProvider } from '../payments/payment-provider';
+import { InvoicingService } from '../invoicing/invoicing.service';
 import { QuotesService } from '../quotes/quotes.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { VouchersService } from '../vouchers/vouchers.service';
@@ -49,6 +50,7 @@ export class OrdersService {
     private readonly vouchers: VouchersService,
     private readonly participants: ParticipantsService,
     private readonly realtime: RealtimePublisher,
+    private readonly invoicing: InvoicingService,
     @Inject(PAYMENT_PROVIDER) private readonly payments: PaymentProvider,
   ) {}
 
@@ -196,6 +198,11 @@ export class OrdersService {
           });
           await this.vouchers.issue(tx, order.id, participant.eventId);
         }
+
+        // L6: queued in the same transaction as the payment. An order that is
+        // paid with no invoice row would be a sale with no document owed to
+        // anyone, and nothing to find it by later.
+        await this.invoicing.enqueue(tx, order.id);
       } else {
         // Spec 6.2: FAILED and EXPIRED release the reserved stock immediately.
         await this.inventory.release(tx, movements);

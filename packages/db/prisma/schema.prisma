@@ -139,6 +139,13 @@ model Product {
   isAlcoholic Boolean @default(true) @map("is_alcoholic")
   volumeMl    Int?    @map("volume_ml")
 
+  /// L6: a fiscal document needs a VAT rate per line. In Portuguese catering
+  /// alcoholic drinks are taxed at the standard rate and most non-alcoholic
+  /// ones at the intermediate rate, so it cannot be a single global setting.
+  /// Stored in basis points (2300 = 23%), keeping the "no floats" rule that
+  /// money already follows.
+  vatBasisPoints Int @default(2300) @map("vat_basis_points")
+
   costCents      Int @map("cost_cents")
   basePriceCents Int @map("base_price_cents")
   minPriceCents  Int @map("min_price_cents")

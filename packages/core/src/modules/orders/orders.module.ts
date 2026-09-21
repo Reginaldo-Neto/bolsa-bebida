@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EventsModule } from '../events/events.module';
 import { InventoryModule } from '../inventory/inventory.module';
+import { InvoicingModule } from '../invoicing/invoicing.module';
 import { ParticipantsModule } from '../participants/participants.module';
 import { PaymentsModule } from '../payments/payments.module';
 import { QuotesModule } from '../quotes/quotes.module';
@@ -21,6 +22,7 @@ import { PaymentWebhookController } from './payment-webhook.controller';
     ParticipantsModule,
     PaymentsModule,
     RealtimeModule,
+    InvoicingModule,
   ],
   controllers: [OrdersController, PaymentWebhookController],
   providers: [OrdersService, ExpiryService, PaymentPollerService],

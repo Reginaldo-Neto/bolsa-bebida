@@ -1,4 +1,10 @@
-import { ExpiryService, PaymentPollerService, PrismaService, TickService } from '@bolsa/core';
+import {
+  ExpiryService,
+  InvoicingService,
+  PaymentPollerService,
+  PrismaService,
+  TickService,
+} from '@bolsa/core';
 import type { Env } from '@bolsa/core';
 import { PAYMENT_POLL_INTERVAL_SECONDS, parseEngineParams } from '@bolsa/shared';
 import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
@@ -8,7 +14,7 @@ import { Redis } from 'ioredis';
 
 const QUEUE_NAME = 'bolsa';
 
-type JobName = 'tick' | 'expire' | 'poll-payments';
+type JobName = 'tick' | 'expire' | 'poll-payments' | 'invoices';
 
 /**
  * Spec 8: the worker runs the market tick and the housekeeping jobs.
@@ -30,6 +36,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly ticks: TickService,
     private readonly expiry: ExpiryService,
     private readonly poller: PaymentPollerService,
+    private readonly invoicing: InvoicingService,
   ) {
     this.connection = new Redis(this.config.get('REDIS_URL', { infer: true }), {
       maxRetriesPerRequest: null,
@@ -72,6 +79,8 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       ['tick', 10_000],
       ['expire', 10_000],
       ['poll-payments', PAYMENT_POLL_INTERVAL_SECONDS * 1000],
+      // L6: documents owed are retried until they are issued.
+      ['invoices', 30_000],
     ];
 
     for (const [name, every] of jobs) {
@@ -102,6 +111,13 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
         const result = await this.poller.pollPending();
         if (result.settled > 0) {
           this.logger.log(result, 'pagamentos resolvidos por consulta ao gateway');
+        }
+        return;
+      }
+      case 'invoices': {
+        const result = await this.invoicing.processPending();
+        if (result.issued > 0 || result.failed > 0) {
+          this.logger.log(result, 'documentos fiscais');
         }
         return;
       }

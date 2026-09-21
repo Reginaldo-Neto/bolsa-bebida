@@ -38,6 +38,7 @@ export { ParticipantGuard, currentParticipant } from './modules/participants/par
 
 export { PaymentsModule } from './modules/payments/payments.module';
 export { MockPaymentProvider } from './modules/payments/mock-payment.provider';
+export { MbWayPaymentProvider } from './modules/payments/mbway-payment.provider';
 export {
   PAYMENT_PROVIDER,
   PaymentProvider,
@@ -68,3 +69,12 @@ export { StaffService, type ScannedVoucher } from './modules/staff/staff.service
 export { AdminModule } from './modules/admin/admin.module';
 export { AdminService } from './modules/admin/admin.service';
 export { ReportsService, toCsv, parseCsv } from './modules/admin/reports.service';
+
+export { InvoicingModule } from './modules/invoicing/invoicing.module';
+export { InvoicingService } from './modules/invoicing/invoicing.service';
+export {
+  INVOICING_PROVIDER,
+  InvoicingProvider,
+  type InvoiceRequest,
+  type InvoiceResult,
+} from './modules/invoicing/invoicing-provider';
