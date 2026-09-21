@@ -4,6 +4,7 @@ import {
   InvoicingModule,
   MarketModule,
   OrdersModule,
+  ParticipantsModule,
   parseEnv,
 } from '@bolsa/core';
 import { Module } from '@nestjs/common';
@@ -23,6 +24,7 @@ import { SchedulerService } from './scheduler.service';
     MarketModule,
     OrdersModule,
     InvoicingModule,
+    ParticipantsModule,
   ],
   providers: [SchedulerService],
 })

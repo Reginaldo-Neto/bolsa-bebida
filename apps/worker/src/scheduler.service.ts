@@ -3,6 +3,7 @@ import {
   InvoicingService,
   PaymentPollerService,
   PrismaService,
+  RetentionService,
   TickService,
 } from '@bolsa/core';
 import type { Env } from '@bolsa/core';
@@ -14,7 +15,7 @@ import { Redis } from 'ioredis';
 
 const QUEUE_NAME = 'bolsa';
 
-type JobName = 'tick' | 'expire' | 'poll-payments' | 'invoices';
+type JobName = 'tick' | 'expire' | 'poll-payments' | 'invoices' | 'retention';
 
 /**
  * Spec 8: the worker runs the market tick and the housekeeping jobs.
@@ -37,6 +38,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly expiry: ExpiryService,
     private readonly poller: PaymentPollerService,
     private readonly invoicing: InvoicingService,
+    private readonly retention: RetentionService,
   ) {
     this.connection = new Redis(this.config.get('REDIS_URL', { infer: true }), {
       maxRetriesPerRequest: null,
@@ -81,6 +83,8 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
       ['poll-payments', PAYMENT_POLL_INTERVAL_SECONDS * 1000],
       // L6: documents owed are retried until they are issued.
       ['invoices', 30_000],
+      // L7: nothing urgent, but it must actually happen.
+      ['retention', 6 * 60 * 60 * 1000],
     ];
 
     for (const [name, every] of jobs) {
@@ -118,6 +122,13 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
         const result = await this.invoicing.processPending();
         if (result.issued > 0 || result.failed > 0) {
           this.logger.log(result, 'documentos fiscais');
+        }
+        return;
+      }
+      case 'retention': {
+        const anonymized = await this.retention.anonymizeExpired();
+        if (anonymized > 0) {
+          this.logger.log({ anonymized }, 'dados pessoais anonimizados');
         }
         return;
       }

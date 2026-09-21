@@ -35,6 +35,7 @@ export {
   type ParticipantContext,
 } from './modules/participants/participants.service';
 export { ParticipantGuard, currentParticipant } from './modules/participants/participant.guard';
+export { RetentionService } from './modules/participants/retention.service';
 
 export { PaymentsModule } from './modules/payments/payments.module';
 export { MockPaymentProvider } from './modules/payments/mock-payment.provider';
