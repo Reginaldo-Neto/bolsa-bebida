@@ -13,11 +13,19 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import type { StaffContext } from '../auth/auth.service';
-import { EventsService } from '../events/events.service';
+import { EventsService, type EventContext } from '../events/events.service';
 import { InventoryService } from '../inventory/inventory.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 
+export interface AdminAlert {
+  level: 'warning' | 'error';
+  code: 'tick-overdue' | 'low-stock' | 'payment-stuck' | 'invoice-failed';
+  message: string;
+}
+
 export interface AdminMetricsView {
+  /** Spec 13.3: what should make someone look up from the bar. */
+  alerts: AdminAlert[];
   revenueCents: number;
   unitsSold: number;
   pendingOrders: number;
@@ -262,7 +270,7 @@ export class AdminService {
   async metrics(eventId: string): Promise<AdminMetricsView> {
     const event = await this.events.findById(eventId);
 
-    const [products, paidItems, pendingOrders] = await Promise.all([
+    const [products, paidItems, pendingOrders, stuckPayments, failedInvoices] = await Promise.all([
       this.prisma.client.product.findMany({
         where: { eventId, archived: false },
         include: { engineState: true },
@@ -278,6 +286,18 @@ export class AdminService {
       this.prisma.client.order.count({
         where: { participant: { eventId }, status: 'PENDING' },
       }),
+      // A payment still pending long after it was started means the gateway's
+      // webhook never arrived (spec 13.3).
+      this.prisma.client.payment.count({
+        where: {
+          status: 'PENDING',
+          createdAt: { lt: new Date(Date.now() - 60_000) },
+          order: { participant: { eventId } },
+        },
+      }),
+      this.prisma.client.invoice.count({
+        where: { status: 'FAILED', order: { participant: { eventId } } },
+      }),
     ]);
 
     const soldByProduct = new Map<string, number>();
@@ -290,7 +310,12 @@ export class AdminService {
       soldByProduct.set(item.productId, (soldByProduct.get(item.productId) ?? 0) + item.qty);
     }
 
+    const lowStock = products.filter(
+      (product) => product.stockInitial > 0 && product.stockAvailable / product.stockInitial < 0.1,
+    );
+
     return {
+      alerts: this.buildAlerts(event, { lowStock, stuckPayments, failedInvoices }),
       revenueCents,
       unitsSold,
       pendingOrders,
@@ -310,6 +335,61 @@ export class AdminService {
         unitsSold: soldByProduct.get(product.id) ?? 0,
       })),
     };
+  }
+
+  /** Spec 13.3: the four things worth interrupting the organiser for. */
+  private buildAlerts(
+    event: EventContext,
+    counts: {
+      lowStock: { name: string }[];
+      stuckPayments: number;
+      failedInvoices: number;
+    },
+  ): AdminAlert[] {
+    const alerts: AdminAlert[] = [];
+
+    // A market that stopped moving while it is open means the worker died.
+    if (event.status === 'OPEN' && !event.fixedPrices) {
+      const overdueAfter = event.engineParams.tickSeconds * 2 * 1000;
+      const since = event.lastTickAt ? Date.now() - event.lastTickAt.getTime() : Infinity;
+
+      if (since > overdueAfter) {
+        alerts.push({
+          level: 'error',
+          code: 'tick-overdue',
+          message: event.lastTickAt
+            ? `As cotacoes nao sao atualizadas ha ${Math.round(since / 60000)} minutos. O worker esta a correr?`
+            : 'As cotacoes ainda nao comecaram a ser atualizadas. O worker esta a correr?',
+        });
+      }
+    }
+
+    if (counts.lowStock.length > 0) {
+      alerts.push({
+        level: 'warning',
+        code: 'low-stock',
+        message: `Abaixo de 10% de stock: ${counts.lowStock.map((product) => product.name).join(', ')}.`,
+      });
+    }
+
+    if (counts.stuckPayments > 0) {
+      alerts.push({
+        level: 'warning',
+        code: 'payment-stuck',
+        message: `${counts.stuckPayments} pagamento(s) sem confirmacao ha mais de um minuto.`,
+      });
+    }
+
+    // L6: a sale with no fiscal document is a legal problem, not a glitch.
+    if (counts.failedInvoices > 0) {
+      alerts.push({
+        level: 'error',
+        code: 'invoice-failed',
+        message: `${counts.failedInvoices} documento(s) fiscal(is) por emitir apos varias tentativas.`,
+      });
+    }
+
+    return alerts;
   }
 
   async createProduct(staff: StaffContext, input: ProductInput) {

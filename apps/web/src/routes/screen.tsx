@@ -1,8 +1,10 @@
+import { useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { PriceChange } from '../components/price-change';
 import { useMarket } from '../hooks/use-market';
+import { api } from '../lib/api';
 import { formatCents } from '../lib/format';
 
 const BANNER_MESSAGES = [
@@ -22,6 +24,14 @@ export function PublicScreen(): React.JSX.Element {
   const eventId = params.get('event');
   const { snapshot, products, connection } = useMarket(eventId);
   const [banner, setBanner] = useState(0);
+
+  // Spec 4.8: the top five, optional and opt-in only.
+  const leaderboard = useQuery({
+    queryKey: ['public-leaderboard', eventId],
+    queryFn: () => api.publicLeaderboard(eventId ?? ''),
+    enabled: Boolean(eventId),
+    refetchInterval: 30_000,
+  });
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -104,11 +114,28 @@ export function PublicScreen(): React.JSX.Element {
           </tbody>
         </table>
 
-        <aside className="flex w-64 flex-col items-center justify-start">
+        <aside className="flex w-72 flex-col items-center justify-start">
           <div className="rounded-2xl bg-white p-3">
             <canvas ref={canvasRef} aria-label="Codigo de entrada" />
           </div>
           <p className="mt-4 text-center text-xl text-muted">Aponte a camara</p>
+
+          {(leaderboard.data?.entries.length ?? 0) > 0 && (
+            <div className="mt-8 w-full">
+              <h2 className="mb-3 text-center text-xl tracking-wide text-muted uppercase">
+                Melhor Trader
+              </h2>
+              <ol className="space-y-2">
+                {leaderboard.data?.entries.slice(0, 5).map((entry) => (
+                  <li key={entry.participantId} className="flex items-baseline gap-3 text-2xl">
+                    <span className="w-6 text-muted tabular">{entry.position}</span>
+                    <span className="min-w-0 flex-1 truncate">{entry.nickname}</span>
+                    <span className="tabular text-up">{entry.points}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
         </aside>
       </div>
 

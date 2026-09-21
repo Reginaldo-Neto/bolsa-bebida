@@ -75,6 +75,17 @@ function AdminDashboard(): React.JSX.Element {
         </div>
       )}
 
+      {/* Spec 13.3: what should make someone look up from the bar. */}
+      {data && data.alerts.length > 0 && (
+        <section className="mt-4 space-y-2">
+          {data.alerts.map((alert) => (
+            <Alert key={alert.code} tone={alert.level === 'error' ? 'error' : 'warning'}>
+              {alert.message}
+            </Alert>
+          ))}
+        </section>
+      )}
+
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Metric label="Receita" value={formatCents(data?.revenueCents ?? 0)} />
         <Metric label="Unidades" value={String(data?.unitsSold ?? 0)} />

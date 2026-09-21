@@ -54,7 +54,14 @@ export interface ScannedVoucher {
   lastRedemption: { at: string; pickupPoint: string | null } | null;
 }
 
+export interface AdminAlert {
+  level: 'warning' | 'error';
+  code: string;
+  message: string;
+}
+
 export interface AdminDashboard {
+  alerts: AdminAlert[];
   revenueCents: number;
   unitsSold: number;
   pendingOrders: number;

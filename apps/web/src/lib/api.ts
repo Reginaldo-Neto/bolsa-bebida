@@ -148,6 +148,10 @@ export const api = {
 
   leaderboard: () => request<LeaderboardView>('/leaderboard'),
 
+  /** Sessionless: the venue screen has no participant (spec 4.8). */
+  publicLeaderboard: (eventId: string) =>
+    request<LeaderboardView>(`/events/${eventId}/leaderboard`),
+
   setLeaderboardOptIn: (optIn: boolean) =>
     request<{ optedIn: boolean }>('/me/leaderboard', {
       method: 'POST',
