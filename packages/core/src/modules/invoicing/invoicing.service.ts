@@ -96,8 +96,8 @@ export class InvoicingService {
         });
 
         this.logger.warn(
-          { orderId: invoice.orderId, attempt: invoice.attempts + 1, err: message },
-          'nao foi possivel emitir o documento fiscal',
+          `tentativa ${invoice.attempts + 1} de emitir o documento da encomenda ` +
+            `${invoice.orderId} falhou: ${message}`,
         );
       }
     }

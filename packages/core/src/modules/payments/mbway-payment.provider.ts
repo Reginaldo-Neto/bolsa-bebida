@@ -69,8 +69,7 @@ export class MbWayPaymentProvider implements PaymentProvider {
     if (!response.ok) {
       const detail = await response.text().catch(() => '');
       this.logger.error(
-        { status: response.status, orderId: request.orderId },
-        'o gateway recusou o pedido de pagamento',
+        `o gateway recusou o pedido de pagamento: ${response.status} (encomenda ${request.orderId})`,
       );
       throw new DomainError(
         'payment-failed',
@@ -163,7 +162,7 @@ export class MbWayPaymentProvider implements PaymentProvider {
         return 'EXPIRED';
       default:
         if (status && status.toUpperCase() !== 'PENDING') {
-          this.logger.warn({ status }, 'estado desconhecido do gateway, tratado como pendente');
+          this.logger.warn(`estado desconhecido do gateway "${status}", tratado como pendente`);
         }
         return 'PENDING';
     }

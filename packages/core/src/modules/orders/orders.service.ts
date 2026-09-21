@@ -168,8 +168,7 @@ export class OrdersService {
       const order = payment.order;
       if (!canTransitionOrder(order.status, status === 'PAID' ? 'PAID' : statusToOrder(status))) {
         this.logger.warn(
-          { orderId: order.id, from: order.status, to: status },
-          'ignoring a payment outcome that the order cannot accept',
+          `encomenda ${order.id} em ${order.status} nao aceita o resultado ${status}`,
         );
         return { applied: false, participantId: null, orderId: null, status: null };
       }

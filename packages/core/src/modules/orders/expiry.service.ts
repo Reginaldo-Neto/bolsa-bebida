@@ -1,5 +1,6 @@
 import type { QuoteItem } from '@bolsa/shared';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../../common/prisma.service';
 import { InventoryService, type StockMovement } from '../inventory/inventory.service';
 import { OrdersService } from './orders.service';
@@ -12,12 +13,11 @@ const BATCH_SIZE = 200;
  */
 @Injectable()
 export class ExpiryService {
-  private readonly logger = new Logger(ExpiryService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly inventory: InventoryService,
     private readonly orders: OrdersService,
+    @InjectPinoLogger(ExpiryService.name) private readonly logger: PinoLogger,
   ) {}
 
   /** Spec 4.4: an ACTIVE quote past its TTL releases the stock it reserved. */

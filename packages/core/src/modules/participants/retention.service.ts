@@ -1,4 +1,5 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../../common/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
@@ -16,11 +17,10 @@ const BATCH_SIZE = 500;
  */
 @Injectable()
 export class RetentionService {
-  private readonly logger = new Logger(RetentionService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
+    @InjectPinoLogger(RetentionService.name) private readonly logger: PinoLogger,
   ) {}
 
   async anonymizeExpired(now: Date = new Date()): Promise<number> {
@@ -97,7 +97,7 @@ export class RetentionService {
         entity: 'participant',
         after: { count: anonymized },
       });
-      this.logger.log({ eventId, count: anonymized }, 'dados pessoais anonimizados');
+      this.logger.info({ eventId, count: anonymized }, 'dados pessoais anonimizados');
     }
 
     return anonymized;

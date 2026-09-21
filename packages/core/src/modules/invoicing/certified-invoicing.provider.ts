@@ -52,8 +52,7 @@ export class CertifiedInvoicingProvider implements InvoicingProvider {
     if (!response.ok) {
       const detail = await response.text().catch(() => '');
       this.logger.error(
-        { status: response.status, orderId: request.orderId },
-        'a faturacao certificada recusou o documento',
+        `a faturacao recusou o documento: ${response.status} (encomenda ${request.orderId})`,
       );
       throw new DomainError(
         'internal-error',

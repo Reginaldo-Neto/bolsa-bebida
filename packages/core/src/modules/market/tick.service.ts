@@ -2,7 +2,8 @@ import { newId } from '@bolsa/db';
 import type { ProductState, TickOutput } from '@bolsa/pricing-engine';
 import { runTick } from '@bolsa/pricing-engine';
 import { changeRatio, eventAllowsPriceTicks, eventRoom } from '@bolsa/shared';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../../common/prisma.service';
 import { EventsService } from '../events/events.service';
 import { LeaderboardService } from '../leaderboard/leaderboard.service';
@@ -22,13 +23,12 @@ export interface TickResult {
  */
 @Injectable()
 export class TickService {
-  private readonly logger = new Logger(TickService.name);
-
   constructor(
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
     private readonly realtime: RealtimePublisher,
     private readonly leaderboard: LeaderboardService,
+    @InjectPinoLogger(TickService.name) private readonly logger: PinoLogger,
   ) {}
 
   async runFor(eventId: string, now: Date = new Date()): Promise<TickResult> {
@@ -200,7 +200,7 @@ export class TickService {
       }
     });
 
-    this.logger.log({ eventId, tick, products: output.products.length }, 'tick applied');
+    this.logger.info({ eventId, tick, products: output.products.length }, 'tick applied');
   }
 }
 

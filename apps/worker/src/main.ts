@@ -1,13 +1,15 @@
 import 'reflect-metadata';
 
-import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { Logger } from 'nestjs-pino';
 import { WorkerModule } from './worker.module';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.createApplicationContext(WorkerModule);
+  const app = await NestFactory.createApplicationContext(WorkerModule, { bufferLogs: true });
+  app.useLogger(app.get(Logger));
   app.enableShutdownHooks();
-  Logger.log('Worker do motor de precos a correr', 'Bootstrap');
+
+  app.get(Logger).log('Worker do motor de precos a correr');
 }
 
 void bootstrap();

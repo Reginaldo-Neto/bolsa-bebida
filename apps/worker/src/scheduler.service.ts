@@ -8,8 +8,9 @@ import {
 } from '@bolsa/core';
 import type { Env } from '@bolsa/core';
 import { PAYMENT_POLL_INTERVAL_SECONDS, parseEngineParams } from '@bolsa/shared';
-import { Injectable, Logger, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
+import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
 
@@ -26,7 +27,6 @@ type JobName = 'tick' | 'expire' | 'poll-payments' | 'invoices' | 'retention';
  */
 @Injectable()
 export class SchedulerService implements OnModuleInit, OnModuleDestroy {
-  private readonly logger = new Logger(SchedulerService.name);
   private readonly connection: Redis;
   private queue?: Queue;
   private worker?: Worker;
@@ -39,6 +39,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly poller: PaymentPollerService,
     private readonly invoicing: InvoicingService,
     private readonly retention: RetentionService,
+    @InjectPinoLogger(SchedulerService.name) private readonly logger: PinoLogger,
   ) {
     this.connection = new Redis(this.config.get('REDIS_URL', { infer: true }), {
       maxRetriesPerRequest: null,
@@ -61,7 +62,7 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     });
 
     await this.scheduleRepeatables();
-    this.logger.log('worker pronto');
+    this.logger.info('worker pronto');
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -107,28 +108,28 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
         const quotes = await this.expiry.expireQuotes();
         const orders = await this.expiry.expireOrders();
         if (quotes || orders) {
-          this.logger.log({ quotes, orders }, 'reservas libertadas');
+          this.logger.info({ quotes, orders }, 'reservas libertadas');
         }
         return;
       }
       case 'poll-payments': {
         const result = await this.poller.pollPending();
         if (result.settled > 0) {
-          this.logger.log(result, 'pagamentos resolvidos por consulta ao gateway');
+          this.logger.info(result, 'pagamentos resolvidos por consulta ao gateway');
         }
         return;
       }
       case 'invoices': {
         const result = await this.invoicing.processPending();
         if (result.issued > 0 || result.failed > 0) {
-          this.logger.log(result, 'documentos fiscais');
+          this.logger.info(result, 'documentos fiscais');
         }
         return;
       }
       case 'retention': {
         const anonymized = await this.retention.anonymizeExpired();
         if (anonymized > 0) {
-          this.logger.log({ anonymized }, 'dados pessoais anonimizados');
+          this.logger.info({ anonymized }, 'dados pessoais anonimizados');
         }
         return;
       }

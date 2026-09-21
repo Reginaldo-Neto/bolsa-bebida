@@ -19,8 +19,7 @@ export class MockInvoicingProvider implements InvoicingProvider {
     const documentNumber = `MOCK/${new Date().getFullYear()}/${String(this.sequence).padStart(5, '0')}`;
 
     this.logger.log(
-      { orderId: request.orderId, totalCents: request.totalCents, documentNumber },
-      'documento fiscal simulado',
+      `documento fiscal simulado ${documentNumber} para a encomenda ${request.orderId}`,
     );
 
     return Promise.resolve({ documentNumber });

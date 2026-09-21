@@ -1,15 +1,10 @@
 import { createHash } from 'node:crypto';
 import { DomainError, idempotencyKeySchema } from '@bolsa/shared';
-import {
-  CallHandler,
-  ExecutionContext,
-  Injectable,
-  Logger,
-  type NestInterceptor,
-} from '@nestjs/common';
+import { CallHandler, ExecutionContext, Injectable, type NestInterceptor } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { type Observable, from, of, switchMap } from 'rxjs';
 import { tap } from 'rxjs/operators';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import { PrismaService } from './prisma.service';
 
 interface RequestWithParticipant extends FastifyRequest {
@@ -26,9 +21,10 @@ interface RequestWithParticipant extends FastifyRequest {
  */
 @Injectable()
 export class IdempotencyInterceptor implements NestInterceptor {
-  private readonly logger = new Logger(IdempotencyInterceptor.name);
-
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @InjectPinoLogger(IdempotencyInterceptor.name) private readonly logger: PinoLogger,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<RequestWithParticipant>();

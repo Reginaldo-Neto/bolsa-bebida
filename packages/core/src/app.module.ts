@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
+import { LoggingModule } from './common/logging.module';
 import { parseEnv } from './config/env';
 import { HealthController } from './health.controller';
 import { AdminModule } from './modules/admin/admin.module';
@@ -26,6 +27,7 @@ import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.modul
       ignoreEnvFile: process.env.NODE_ENV === 'test',
       validate: parseEnv,
     }),
+    LoggingModule,
     CommonModule,
     AuditModule,
     AuthModule,

@@ -4,7 +4,8 @@ import {
   type ServerEventName,
   type ServerEvents,
 } from '@bolsa/shared';
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
 import type { Redis } from 'ioredis';
 import { REDIS_PUBLISHER } from './redis.provider';
 
@@ -17,9 +18,10 @@ import { REDIS_PUBLISHER } from './redis.provider';
  */
 @Injectable()
 export class RealtimePublisher {
-  private readonly logger = new Logger(RealtimePublisher.name);
-
-  constructor(@Inject(REDIS_PUBLISHER) private readonly redis: Redis) {}
+  constructor(
+    @Inject(REDIS_PUBLISHER) private readonly redis: Redis,
+    @InjectPinoLogger(RealtimePublisher.name) private readonly logger: PinoLogger,
+  ) {}
 
   publish<K extends ServerEventName>(room: string, event: K, payload: ServerEvents[K]): void {
     const message: RealtimeMessage = { room, event, payload };

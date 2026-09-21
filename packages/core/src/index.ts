@@ -7,6 +7,7 @@ export { AppModule } from './app.module';
 export { HealthController } from './health.controller';
 
 export { CommonModule } from './common/common.module';
+export { LoggingModule } from './common/logging.module';
 export { PrismaService } from './common/prisma.service';
 export { ProblemDetailsFilter } from './common/problem.filter';
 export { ZodValidationPipe, zodPipe } from './common/zod.pipe';

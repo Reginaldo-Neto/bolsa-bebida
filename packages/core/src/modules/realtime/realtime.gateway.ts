@@ -29,7 +29,7 @@ export class RealtimeGateway implements OnGatewayInit, OnGatewayConnection, OnMo
     this.server = server;
 
     void this.redis.subscribe(REALTIME_CHANNEL).catch((error: unknown) => {
-      this.logger.error({ err: error }, 'nao foi possivel subscrever o canal de tempo real');
+      this.logger.error(`nao foi possivel subscrever o canal de tempo real: ${String(error)}`);
     });
 
     this.redis.on('message', (channel: string, raw: string) => {

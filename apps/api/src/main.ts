@@ -4,11 +4,12 @@ import cookie from '@fastify/cookie';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { AppModule, ProblemDetailsFilter, type Env } from '@bolsa/core';
-import { Logger } from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { FastifyAdapter, type NestFastifyApplication } from '@nestjs/platform-fastify';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestFastifyApplication>(
@@ -16,8 +17,11 @@ async function bootstrap(): Promise<void> {
     new FastifyAdapter({ trustProxy: true, bodyLimit: 1_048_576 }),
     // Payment webhooks are signed over the exact bytes received, so the raw
     // body has to survive JSON parsing (spec 12.1).
-    { rawBody: true },
+    { rawBody: true, bufferLogs: true },
   );
+
+  // Spec 13.3: everything the framework logs goes through pino as well.
+  app.useLogger(app.get(Logger));
 
   const config = app.get(ConfigService<Env, true>);
   const isProduction = config.get('NODE_ENV', { infer: true }) === 'production';
@@ -68,7 +72,7 @@ async function bootstrap(): Promise<void> {
 
   const port = config.get('API_PORT', { infer: true });
   await app.listen({ port, host: '0.0.0.0' });
-  Logger.log(`API a escutar em http://localhost:${port}`, 'Bootstrap');
+  app.get(Logger).log(`API a escutar na porta ${port}`);
 }
 
 void bootstrap();
