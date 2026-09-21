@@ -1,6 +1,7 @@
 import { quoteRequestSchema, type QuoteRequest, type QuoteResponse } from '@bolsa/shared';
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IdempotencyInterceptor } from '../../common/idempotency.interceptor';
 import { zodPipe } from '../../common/zod.pipe';
 import {
   ParticipantGuard,
@@ -12,6 +13,7 @@ import { QuotesService } from './quotes.service';
 @ApiTags('quotes')
 @Controller('quotes')
 @UseGuards(ParticipantGuard)
+@UseInterceptors(IdempotencyInterceptor)
 export class QuotesController {
   constructor(private readonly quotes: QuotesService) {}
 

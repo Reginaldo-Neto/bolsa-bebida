@@ -152,7 +152,6 @@ packages/
   pricing-engine/   Motor de preços puro + vetores de teste
   db/               Prisma: schema, migrações e cliente
   core/             Domínio NestJS partilhado pela API e pelo worker
-  ui/               Componentes React partilhados
 research/
   simulator/        Python: simulação baseada em agentes para calibrar o motor
 infra/

@@ -1,6 +1,7 @@
 import { orderRequestSchema, type OrderRequest } from '@bolsa/shared';
-import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { IdempotencyInterceptor } from '../../common/idempotency.interceptor';
 import { zodPipe } from '../../common/zod.pipe';
 import {
   ParticipantGuard,
@@ -12,6 +13,7 @@ import { OrdersService, type OrderSummary } from './orders.service';
 @ApiTags('orders')
 @Controller()
 @UseGuards(ParticipantGuard)
+@UseInterceptors(IdempotencyInterceptor)
 export class OrdersController {
   constructor(private readonly orders: OrdersService) {}
 

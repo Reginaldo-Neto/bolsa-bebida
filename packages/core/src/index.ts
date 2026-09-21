@@ -10,6 +10,7 @@ export { CommonModule } from './common/common.module';
 export { PrismaService } from './common/prisma.service';
 export { ProblemDetailsFilter } from './common/problem.filter';
 export { ZodValidationPipe, zodPipe } from './common/zod.pipe';
+export { IdempotencyInterceptor } from './common/idempotency.interceptor';
 
 export { parseEnv, type Env } from './config/env';
 
