@@ -106,6 +106,42 @@ WAY faria. Confirme, e o voucher aparece — pronto a ser lido em `/staff`.
 Esses botões só existem em desenvolvimento: o `import.meta.env.DEV` retira-os do build de produção
 e a API recusa a rota quando `NODE_ENV=production`.
 
+## Pôr no servidor da festa
+
+No VPS (União Europeia, por causa da L7), com o domínio já a apontar para ele:
+
+```bash
+corepack pnpm --filter @bolsa/api keys:generate
+```
+
+Copie o que sair para o `.env` do servidor, junte as credenciais do gateway MB WAY e do software
+de faturação certificado, e ponha `NODE_ENV=production`. A API **recusa arrancar** com os
+providers simulados em produção — uma festa que vende bebidas sem documento fiscal está a violar
+a L6, não a correr com um stub.
+
+```bash
+docker compose -f infra/docker-compose.prod.yml up -d --build
+```
+
+Isto levanta o PostgreSQL, o Redis, as migrações, a API, o worker e o Caddy com HTTPS automático,
+mais um dump da base de dados de 15 em 15 minutos (secção 12.3).
+
+## Testes de carga e ponta-a-ponta
+
+```bash
+k6 run -e BASE_URL=https://staging.exemplo.pt -e EVENT_ID=<id> infra/k6/purchase-load.js
+```
+
+500 participantes ligados e 50 compras por minuto, com as metas da secção 13.1. Corra contra um
+ambiente de testes, nunca contra a festa.
+
+```bash
+corepack pnpm --filter @bolsa/web test:e2e:install
+E2E_BASE_URL=http://localhost:5173 E2E_EVENT_ID=<id> corepack pnpm --filter @bolsa/web test:e2e
+```
+
+Faz o percurso completo num ecrã de telemóvel e mede os 20 segundos que a F3 exige.
+
 ## Testes sem Docker
 
 Os testes de integração precisam de um PostgreSQL a sério: o que eles verificam são garantias
@@ -166,6 +202,27 @@ processo. O motor de preços não toca em base de dados nem na rede.
 O domínio vive em `packages/core` e não dentro da API porque o worker precisa exatamente da
 mesma lógica de liquidação de pagamentos e de stock. A alternativa seria o worker ter a sua
 própria cópia, que mais cedo ou mais tarde divergiria.
+
+## Estado do roadmap
+
+| Fase | Estado |
+| --- | --- |
+| F0 monorepo, CI | feito |
+| F1 motor de preços + simulador | feito |
+| F2 backend, stock, vouchers, worker | feito |
+| F3 PWA, ecrã público, WebSocket | feito |
+| F4 staff, admin, auditoria, relatórios | feito |
+| F5 MB WAY, faturação certificada | estrutura feita; falta escolher os fornecedores (14.2) |
+| F6 ranking, carga, endurecimento | feito |
+
+Por decidir antes da festa, da secção 14.2: o gateway MB WAY, o software de faturação certificado,
+quem fatura, a política para vouchers não levantados e a lista final de bebidas. Os adapters estão
+escritos contra a forma comum destas APIs; mudar para a escolhida é editar os corpos dos pedidos,
+não a arquitetura.
+
+Ficou deliberadamente de fora: métricas Prometheus (13.3). Os alertas do painel — cotações
+paradas, stock baixo, pagamentos sem confirmação, faturas por emitir — cobrem o que é preciso
+vigiar numa noite, e um endpoint de métricas sem ninguém a recolhê-las não serve de nada.
 
 ## Regras que o código tem de respeitar
 
