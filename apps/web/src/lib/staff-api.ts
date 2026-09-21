@@ -62,6 +62,9 @@ export interface AdminAlert {
 
 export interface AdminDashboard {
   alerts: AdminAlert[];
+  status: string;
+  fixedPrices: boolean;
+  engineParams: Record<string, number | boolean>;
   revenueCents: number;
   unitsSold: number;
   pendingOrders: number;
@@ -101,6 +104,12 @@ export const staffApi = {
     request<ScannedVoucher>('/staff/vouchers/scan', {
       method: 'POST',
       body: JSON.stringify(body),
+    }),
+
+  findByPhone: (phone: string) =>
+    request<ScannedVoucher[]>('/staff/vouchers/by-phone', {
+      method: 'POST',
+      body: JSON.stringify({ phone }),
     }),
 
   redeem: (

@@ -26,6 +26,9 @@ export interface AdminAlert {
 export interface AdminMetricsView {
   /** Spec 13.3: what should make someone look up from the bar. */
   alerts: AdminAlert[];
+  status: string;
+  fixedPrices: boolean;
+  engineParams: Record<string, number | boolean>;
   revenueCents: number;
   unitsSold: number;
   pendingOrders: number;
@@ -316,6 +319,9 @@ export class AdminService {
 
     return {
       alerts: this.buildAlerts(event, { lowStock, stuckPayments, failedInvoices }),
+      status: event.status,
+      fixedPrices: event.fixedPrices,
+      engineParams: { ...event.engineParams },
       revenueCents,
       unitsSold,
       pendingOrders,

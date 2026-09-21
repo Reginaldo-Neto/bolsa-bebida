@@ -1,7 +1,7 @@
 import { joinRequestSchema } from '@bolsa/shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Button, Field, inputClass } from '../components/ui';
 import { ApiError, api } from '../lib/api';
 import { useCart } from '../lib/store';
@@ -116,8 +116,12 @@ export function JoinScreen({ eventName }: { eventName: string }): React.JSX.Elem
       </div>
 
       <p className="mt-8 text-center text-xs text-muted">
-        Ao entrar aceita os termos e a politica de privacidade. Recolhemos apenas o nome que
-        escolher e, no pagamento, o numero de telemovel — guardado apenas em forma cifrada.
+        Recolhemos apenas o nome que escolher e, no pagamento, o numero de telemovel — guardado
+        apenas em forma cifrada.{' '}
+        <Link to="/privacidade" className="text-accent underline">
+          Como tratamos os seus dados
+        </Link>
+        .
       </p>
     </main>
   );

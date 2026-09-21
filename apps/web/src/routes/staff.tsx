@@ -128,8 +128,29 @@ function StaffScanner(): React.JSX.Element {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<ScanState>({ kind: 'scanning' });
   const [manualCode, setManualCode] = useState('');
+  const [phone, setPhone] = useState('');
   const [ageChecked, setAgeChecked] = useState(false);
   const busy = useRef(false);
+
+  /** Spec 6.4: the participant lost their session but is standing right here. */
+  const lookUpByPhone = useCallback(async (value: string) => {
+    try {
+      const vouchers = await staffApi.findByPhone(value);
+      if (vouchers.length === 0) {
+        setState({ kind: 'error', message: 'Sem vouchers por levantar para esse numero.' });
+        return;
+      }
+      navigator.vibrate?.(60);
+      setAgeChecked(false);
+      // More than one is rare; the rest are reachable by their short codes.
+      setState({ kind: 'found', voucher: vouchers[0] as ScannedVoucher });
+    } catch (error) {
+      setState({
+        kind: 'error',
+        message: error instanceof ApiError ? error.message : 'Nao foi possivel procurar.',
+      });
+    }
+  }, []);
 
   const lookUp = useCallback(async (payload: { qr: string } | { shortCode: string }) => {
     if (busy.current) {
@@ -343,6 +364,31 @@ function StaffScanner(): React.JSX.Element {
           Procurar
         </Button>
       </form>
+
+      {/* Spec 6.4: someone who closed the app and has nothing to show. */}
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(submitEvent) => {
+          submitEvent.preventDefault();
+          void lookUpByPhone(phone);
+        }}
+      >
+        <input
+          className={`${inputClass} tabular`}
+          value={phone}
+          onChange={(changeEvent) => setPhone(changeEvent.target.value)}
+          type="tel"
+          inputMode="numeric"
+          placeholder="Telemovel do pagamento"
+          aria-label="Telemovel usado no pagamento"
+        />
+        <Button type="submit" variant="secondary" disabled={phone.replace(/\D/g, '').length < 9}>
+          Procurar
+        </Button>
+      </form>
+      <p className="mt-2 text-center text-xs text-muted">
+        Se o participante perdeu a aplicacao, procure pelo numero com que pagou.
+      </p>
     </main>
   );
 }

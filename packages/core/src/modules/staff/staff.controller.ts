@@ -1,4 +1,9 @@
-import { redeemRequestSchema, voucherScanRequestSchema } from '@bolsa/shared';
+import {
+  redeemRequestSchema,
+  voucherLookupSchema,
+  voucherScanRequestSchema,
+  type VoucherLookupRequest,
+} from '@bolsa/shared';
 import { Body, Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { zodPipe } from '../../common/zod.pipe';
@@ -18,6 +23,15 @@ export class StaffController {
     @Body(zodPipe(voucherScanRequestSchema)) body: { qr?: string; shortCode?: string },
   ): Promise<ScannedVoucher> {
     return this.staff.scan(currentStaff(request), body);
+  }
+
+  @Post('vouchers/by-phone')
+  @ApiOperation({ summary: 'Procura vouchers por telemovel, para quem perdeu a sessao' })
+  findByPhone(
+    @Req() request: RequestWithStaff,
+    @Body(zodPipe(voucherLookupSchema)) body: VoucherLookupRequest,
+  ): Promise<ScannedVoucher[]> {
+    return this.staff.findByPhone(currentStaff(request), body.phone);
   }
 
   @Post('vouchers/:voucherId/redeem')

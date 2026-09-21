@@ -12,6 +12,7 @@ import { JoinScreen } from './routes/join';
 import { MarketScreen } from './routes/market';
 import { PaymentScreen } from './routes/payment';
 import { PricesScreen } from './routes/prices';
+import { PrivacyScreen } from './routes/privacy';
 import { RankingScreen } from './routes/ranking';
 import { PublicScreen } from './routes/screen';
 import { StaffApp } from './routes/staff';
@@ -94,6 +95,8 @@ export function App(): React.JSX.Element {
       {/* Public, sessionless surfaces. */}
       <Route path="/screen" element={<PublicScreen />} />
       <Route path="/prices" element={<PricesScreen />} />
+      {/* L7: readable before anyone hands over a nickname. */}
+      <Route path="/privacidade" element={<PrivacyScreen />} />
 
       {/* Behind a staff session, not a participant one. */}
       <Route path="/staff" element={<StaffApp />} />

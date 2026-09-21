@@ -229,3 +229,8 @@ export type ReportType = (typeof REPORT_TYPES)[number];
 export const leaderboardOptInSchema = z.object({ optIn: z.boolean() });
 
 export type LeaderboardOptInRequest = z.infer<typeof leaderboardOptInSchema>;
+
+/** POST /staff/vouchers/by-phone (spec 6.4). */
+export const voucherLookupSchema = z.object({ phone: phoneSchema });
+
+export type VoucherLookupRequest = z.infer<typeof voucherLookupSchema>;

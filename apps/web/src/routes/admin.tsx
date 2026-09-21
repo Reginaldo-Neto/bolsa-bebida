@@ -1,6 +1,7 @@
 import type { EventAction } from '@bolsa/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { EngineParams } from '../components/engine-params';
 import { Alert, Button, Card, Field, Spinner, inputClass } from '../components/ui';
 import { formatCents } from '../lib/format';
 import { adminApi, staffApi } from '../lib/staff-api';
@@ -57,7 +58,15 @@ function AdminDashboard(): React.JSX.Element {
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
       <header className="flex flex-wrap items-baseline justify-between gap-3">
-        <h1 className="text-2xl font-bold">Administracao</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Administracao</h1>
+          {data && (
+            <p className="text-sm text-muted">
+              {data.status}
+              {data.fixedPrices && ' · precos fixos'}
+            </p>
+          )}
+        </div>
         <button
           type="button"
           className="text-sm text-muted underline"
@@ -161,6 +170,8 @@ function AdminDashboard(): React.JSX.Element {
           </table>
         </div>
       </section>
+
+      {data && <EngineParams params={data.engineParams} onDone={setNotice} />}
 
       <section className="mt-8">
         <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Relatorios</h2>

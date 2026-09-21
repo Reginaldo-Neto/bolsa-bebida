@@ -5,6 +5,7 @@ import { PrismaService } from '../../common/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import type { StaffContext } from '../auth/auth.service';
 import { EventsService } from '../events/events.service';
+import { ParticipantsService } from '../participants/participants.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { VoucherSignerService } from '../vouchers/voucher-signer.service';
 
@@ -38,6 +39,7 @@ export class StaffService {
     private readonly signer: VoucherSignerService,
     private readonly audit: AuditService,
     private readonly realtime: RealtimePublisher,
+    private readonly participants: ParticipantsService,
   ) {}
 
   /**
@@ -98,6 +100,44 @@ export class StaffService {
         ? { at: last.createdAt.toISOString(), pickupPoint: last.pickupPoint }
         : null,
     };
+  }
+
+  /**
+   * Spec 6.4: the participant lost their session and cannot show a voucher.
+   *
+   * The specification suggests recovering it by SMS. There is no SMS provider
+   * chosen yet, and at a party there is something better than one anyway: the
+   * bar. The person is standing in front of the staff, which is stronger proof
+   * than a code sent to a number they just typed in.
+   *
+   * Only staff can do this, only for their own event, and only with the phone
+   * number used at payment — which is stored as a keyed hash, so this is a
+   * lookup and not a way to browse other people's orders.
+   */
+  async findByPhone(staff: StaffContext, phone: string): Promise<ScannedVoucher[]> {
+    await this.events.requireRedeemable(staff.eventId);
+
+    const participants = await this.prisma.client.participant.findMany({
+      where: {
+        eventId: staff.eventId,
+        phoneHash: this.participants.hashPhone(phone),
+        anonymizedAt: null,
+      },
+      select: { orders: { select: { voucher: { select: { shortCode: true } } } } },
+    });
+
+    const shortCodes = participants
+      .flatMap((participant) => participant.orders)
+      .map((order) => order.voucher?.shortCode)
+      .filter((code): code is string => Boolean(code));
+
+    const vouchers: ScannedVoucher[] = [];
+    for (const shortCode of shortCodes) {
+      vouchers.push(await this.scan(staff, { shortCode }));
+    }
+
+    // Anything already handed over in full is noise at a busy bar.
+    return vouchers.filter((voucher) => voucher.items.some((item) => item.pendingQty > 0));
   }
 
   /**
