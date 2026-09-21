@@ -11,7 +11,8 @@
     "lint": "eslint src",
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
-    "setup": "node dist/cli/setup.js"
+    "setup": "node dist/cli/setup.js",
+    "keys:generate": "node dist/cli/generate-keys.js"
   },
   "dependencies": {
     "@bolsa/core": "workspace:*",

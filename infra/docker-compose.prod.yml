@@ -1,0 +1,150 @@
+# The whole platform on one VPS in the EU (spec 7 and 12.3).
+#
+# Run from the repository root:
+#   docker compose -f infra/docker-compose.prod.yml up -d --build
+#
+# Everything below reads from .env. The API refuses to start with a mock payment
+# or invoicing provider when NODE_ENV=production, so a missing key fails at boot
+# rather than at the first sale.
+
+name: bolsa-bebidas-prod
+
+x-app-environment: &app-environment
+  NODE_ENV: production
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=public
+  REDIS_URL: redis://redis:6379
+  SESSION_SECRET: ${SESSION_SECRET}
+  VOUCHER_SIGNING_PRIVATE_KEY: ${VOUCHER_SIGNING_PRIVATE_KEY}
+  VOUCHER_SIGNING_PUBLIC_KEY: ${VOUCHER_SIGNING_PUBLIC_KEY}
+  PAYMENT_PROVIDER: ${PAYMENT_PROVIDER}
+  MBWAY_API_BASE_URL: ${MBWAY_API_BASE_URL}
+  MBWAY_API_KEY: ${MBWAY_API_KEY}
+  MBWAY_WEBHOOK_SECRET: ${MBWAY_WEBHOOK_SECRET}
+  INVOICING_PROVIDER: ${INVOICING_PROVIDER}
+  INVOICING_API_BASE_URL: ${INVOICING_API_BASE_URL}
+  INVOICING_API_KEY: ${INVOICING_API_KEY}
+  CORS_ORIGINS: https://${DOMAIN}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_INITDB_ARGS: '--data-checksums'
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes', '--maxmemory-policy', 'noeviction']
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Runs to completion before the API starts, so the schema is never behind the
+  # code that expects it.
+  migrate:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: worker
+    environment: *app-environment
+    command:
+      [
+        'node_modules/.bin/prisma',
+        'migrate',
+        'deploy',
+        '--schema',
+        'packages/db/prisma/schema.prisma',
+      ]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: api
+    restart: unless-stopped
+    environment: *app-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: worker
+    restart: unless-stopped
+    environment: *app-environment
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+
+  caddy:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      target: web
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - api
+
+  # Spec 12.3: a dump every 15 minutes during the event. Keeps a day's worth,
+  # because the event is one night and a week of dumps is not the problem.
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        while true; do
+          stamp=$$(date +%Y%m%d-%H%M%S)
+          pg_dump -h postgres -U ${POSTGRES_USER} -d ${POSTGRES_DB} -Fc \
+            -f /backups/bolsa-$$stamp.dump && echo "backup $$stamp ok"
+          find /backups -name 'bolsa-*.dump' -mmin +1440 -delete
+          sleep 900
+        done
+
+volumes:
+  postgres-data:
+  redis-data:
+  caddy-data:
+  caddy-config:
