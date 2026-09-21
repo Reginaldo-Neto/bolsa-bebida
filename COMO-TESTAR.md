@@ -182,6 +182,42 @@ O ponto 8 é para quem fechou a aplicação e não tem nada para mostrar.
 
 ---
 
+## 5.1. Percurso do caixa
+
+Nem toda a gente paga com o telemóvel. O caixa vende ao preço do momento e fecha a venda dizendo
+como é que o dinheiro entrou: **em numerário** ou **na maquinha do bar** (que não passa pela
+aplicação — o cartão é passado no terminal físico e o caixa confirma aqui).
+
+Abra `/caixa` **noutra janela anónima** e entre com:
+
+- **Evento:** o id que o passo 2.5 imprimiu
+- **Email:** `caixa@festa.pt`
+- **Password:** `caixa-da-festa-2026`
+
+| # | O que fazer | O que deve acontecer |
+| --- | --- | --- |
+| 1 | Tocar em duas bebidas da grelha | Aparecem na venda com o preço atual e o total em baixo |
+| 2 | Reparar no botão **Cobrar** com álcool na venda | Está desativado até marcar "Verifiquei a identificação (18+)" (L5) |
+| 3 | Marcar a caixa e carregar em **Cobrar** | Contagem decrescente de 60 s: o preço fica bloqueado enquanto conta o dinheiro (L1) |
+| 4 | Escolher **Dinheiro** e escrever `20` no dinheiro recebido | O troco aparece em grande, calculado pelo servidor |
+| 5 | Escrever um valor **menor** que o total | Diz que o dinheiro é inferior ao total e não deixa confirmar |
+| 6 | Confirmar | Ecrã do troco a devolver, e por baixo o voucher com QR e código de 6 letras |
+| 7 | Carregar em **Entregar tudo agora** | Marca como levantado ali mesmo, para quando o caixa também serve |
+| 8 | Deixar passar os 60 s sem confirmar | Diz que a cotação expirou e oferece voltar aos preços atuais |
+| 9 | Escolher **Multibanco (maquinha)** noutra venda | Não pede dinheiro recebido nem calcula troco |
+| 10 | Voltar ao mercado do participante | O stock desceu e a procura conta para o motor, igual a uma compra por MB WAY |
+| 11 | Entrar em `/caixa` com `bar@festa.pt` | Diz que a conta não tem acesso ao caixa |
+
+O que confirmar no painel do organizador a seguir: em **Dinheiro recebido** aparecem as três
+formas de pagamento separadas, que é o número contra o qual se conta a gaveta ao fim da noite. O
+relatório `caixa.csv` tem uma linha por venda paga, com o método, o caixa, o dinheiro recebido e
+o troco.
+
+Duas coisas que o caixa **não** faz, de propósito: o cliente de balcão não entra no ranking (não
+consentiu nada) e não fica com dados pessoais guardados — só o NIF, se o pedir para a fatura.
+
+---
+
 ## 6. Painel do organizador
 
 Abra `/admin`. Entre com `admin@festa.pt`, `admin-da-festa-2026` e o código de 6 dígitos da
@@ -298,6 +334,8 @@ Depois repita os passos 2.2, 2.3 e 2.5.
 | Câmara não abre em `/staff` | O browser só dá câmara em HTTPS ou em `localhost` | Use `localhost`, ou o campo do código de 6 letras |
 | `/admin` recusa o código | Relógio do telemóvel dessincronizado | Acerte a hora automática no telemóvel |
 | Sessão de staff e de participante a baralharem-se | Mesma janela do browser | Use uma janela anónima para cada perfil |
+| `/caixa` diz que a conta não tem acesso | Entrou com `bar@festa.pt` | O caixa é `caixa@festa.pt`; o `bar@festa.pt` só levanta |
+| Ecrã em branco e `x is not a function` na consola | O Vite guardou um pacote do workspace em cache antes de um export novo | Reinicie o `pnpm dev` do site; a configuração já força o reempacotamento |
 
 Para ver o que a API está a fazer, os logs saem no terminal dela. A documentação interativa das
 rotas está em **http://localhost:3000/api/docs**.

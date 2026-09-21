@@ -7,6 +7,7 @@ import { HealthController } from './health.controller';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { CounterModule } from './modules/counter/counter.module';
 import { EventsModule } from './modules/events/events.module';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { MarketModule } from './modules/market/market.module';
@@ -38,6 +39,7 @@ import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.modul
     QuotesModule,
     OrdersModule,
     StaffModule,
+    CounterModule,
     AdminModule,
     RealtimeGatewayModule,
   ],

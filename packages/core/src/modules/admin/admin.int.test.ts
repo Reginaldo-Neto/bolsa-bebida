@@ -204,10 +204,12 @@ describeWithDatabase('admin panel', () => {
     const imported = await post('/admin/products.csv', {
       csv: exported.body.replace('Fino', 'Fino Mini'),
     });
-    expect(imported.json()).toMatchObject({ imported: 3, errors: [] });
+    // Two lines in, two lines imported. The renamed one does not match an
+    // existing product, so the catalogue ends up with three.
+    expect(imported.json()).toMatchObject({ imported: 2, errors: [] });
 
     const products = await client.product.findMany({ where: { eventId: event.eventId } });
-    expect(products.map((product) => product.name)).toContain('Fino Mini');
+    expect(products.map((product) => product.name).sort()).toEqual(['Cidra', 'Fino', 'Fino Mini']);
   });
 
   it('imports nothing at all when a line is wrong', async () => {

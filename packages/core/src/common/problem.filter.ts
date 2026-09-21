@@ -1,4 +1,4 @@
-import { DomainError, problem, type ProblemDetails } from '@bolsa/shared';
+import { DomainError, isZodLikeError, problem, type ProblemDetails } from '@bolsa/shared';
 import {
   ArgumentsHost,
   Catch,
@@ -8,7 +8,6 @@ import {
   Logger,
 } from '@nestjs/common';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { ZodError } from 'zod';
 
 /**
  * Every error leaves the API as RFC 9457 Problem Details (spec 10), so the PWA
@@ -41,7 +40,8 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       return exception.toProblem(instance);
     }
 
-    if (exception instanceof ZodError) {
+    // Matched by shape, not by class: see isZodLikeError.
+    if (isZodLikeError(exception)) {
       return problem('validation-failed', {
         instance,
         detail: 'Os dados enviados nao sao validos.',

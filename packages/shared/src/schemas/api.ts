@@ -70,6 +70,61 @@ export const orderRequestSchema = z.object({
 
 export type OrderRequest = z.infer<typeof orderRequestSchema>;
 
+/**
+ * How an order was paid for.
+ *
+ * MB WAY is the one the application itself settles. The other two happen off
+ * the application entirely — notes into a drawer, or a card on the bar's own
+ * terminal — and the till records which one it was so the money can be counted
+ * against the sales at the end of the night.
+ */
+export const paymentMethodSchema = z.enum(['MBWAY', 'CASH', 'CARD_TERMINAL']);
+
+export type PaymentMethod = z.infer<typeof paymentMethodSchema>;
+
+export const COUNTER_PAYMENT_METHODS = ['CASH', 'CARD_TERMINAL'] as const;
+
+export const counterPaymentMethodSchema = z.enum(COUNTER_PAYMENT_METHODS);
+
+export type CounterPaymentMethod = z.infer<typeof counterPaymentMethodSchema>;
+
+/**
+ * POST /counter/quotes: the till, first half.
+ *
+ * The same two steps as the application — lock the price, then take the money
+ * — because L1 does not stop applying just because the customer is paying in
+ * notes. The customer never opened the application, so there is no session:
+ * the till speaks for them, and the cashier confirms the 18+ check in person.
+ */
+export const counterQuoteSchema = z.object({
+  items: z.array(cartItemSchema).min(1, 'a venda esta vazia').max(20),
+  // L5: the cashier confirms the identification check, face to face.
+  ageChecked: z.boolean().default(false),
+});
+
+export type CounterQuoteRequest = z.infer<typeof counterQuoteSchema>;
+
+/**
+ * POST /counter/sales: the till, second half.
+ *
+ * The money is already in the drawer, or already on the bar's own card
+ * terminal, by the time this is sent. Nothing here contacts a gateway.
+ */
+export const counterSaleSchema = z
+  .object({
+    quoteId: uuidSchema,
+    method: counterPaymentMethodSchema,
+    /** Notes handed over, so the till can show the change. Cash only. */
+    cashReceivedCents: centsSchema.optional(),
+    nif: nifSchema.optional(),
+  })
+  .refine((sale) => sale.method === 'CASH' || sale.cashReceivedCents === undefined, {
+    message: 'o dinheiro recebido so se indica num pagamento em numerario',
+    path: ['cashReceivedCents'],
+  });
+
+export type CounterSaleRequest = z.infer<typeof counterSaleSchema>;
+
 /** POST /me/recover */
 export const recoverRequestSchema = z.object({
   phone: phoneSchema,
@@ -149,6 +204,11 @@ export const quoteResponseSchema = z.object({
 
 export type QuoteResponse = z.infer<typeof quoteResponseSchema>;
 
+/** Spec 3, extended: the till is a third thing a bar account can be. */
+export const staffRoleSchema = z.enum(['STAFF', 'CASHIER', 'ADMIN']);
+
+export type StaffRoleName = z.infer<typeof staffRoleSchema>;
+
 /** POST /auth/login (spec 10.1). */
 export const loginRequestSchema = z.object({
   eventId: uuidSchema,
@@ -222,7 +282,7 @@ export const refundSchema = z.object({
   restock: z.boolean().default(true),
 });
 
-export const REPORT_TYPES = ['vendas', 'precos', 'levantamentos', 'reembolsos'] as const;
+export const REPORT_TYPES = ['vendas', 'precos', 'levantamentos', 'reembolsos', 'caixa'] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
 
 /** POST /me/leaderboard: spec 4.6 lets a participant leave at any time. */

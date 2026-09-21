@@ -26,8 +26,20 @@ export function StaffApp(): React.JSX.Element {
   return <StaffScanner />;
 }
 
-/** Shared by the staff and admin apps; admin additionally needs a TOTP code. */
-export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Element {
+const TITLES = {
+  STAFF: 'staff.title',
+  CASHIER: 'counter.title',
+  ADMIN: 'admin.title',
+} as const;
+
+const INTROS = {
+  STAFF: 'staff.intro',
+  CASHIER: 'counter.intro',
+  ADMIN: 'admin.intro',
+} as const;
+
+/** Shared by the bar, till and admin apps; admin also needs a TOTP code. */
+export function StaffLogin({ role }: { role: 'STAFF' | 'CASHIER' | 'ADMIN' }): React.JSX.Element {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [eventId, setEventId] = useState(localStorage.getItem('bolsa-event') ?? '');
@@ -52,14 +64,10 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4">
       <div className="flex items-center justify-between gap-2">
-        <h1 className="text-2xl font-bold">
-          {role === 'ADMIN' ? t('admin.title') : t('staff.title')}
-        </h1>
+        <h1 className="text-2xl font-bold">{t(TITLES[role])}</h1>
         <SettingsToggle compact />
       </div>
-      <p className="mt-2 text-sm text-muted">
-        {role === 'ADMIN' ? t('admin.intro') : t('staff.intro')}
-      </p>
+      <p className="mt-2 text-sm text-muted">{t(INTROS[role])}</p>
 
       <form
         className="mt-6 space-y-4"

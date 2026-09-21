@@ -7,8 +7,9 @@ import { tap } from 'rxjs/operators';
 import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from './prisma.service';
 
-interface RequestWithParticipant extends FastifyRequest {
+interface RequestWithActor extends FastifyRequest {
   participant?: { id: string };
+  staff?: { id: string };
 }
 
 /**
@@ -29,7 +30,7 @@ export class IdempotencyInterceptor implements NestInterceptor {
   }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
-    const request = context.switchToHttp().getRequest<RequestWithParticipant>();
+    const request = context.switchToHttp().getRequest<RequestWithActor>();
     const header = request.headers['idempotency-key'];
     const rawKey = Array.isArray(header) ? header[0] : header;
 
@@ -42,8 +43,10 @@ export class IdempotencyInterceptor implements NestInterceptor {
       throw new DomainError('validation-failed', 'Idempotency-Key invalida.');
     }
 
-    // Scoped to the participant, so two phones cannot collide on a short key.
-    const scope = `${request.method}:${request.url}:${request.participant?.id ?? 'anon'}`;
+    // Scoped to whoever is acting, so two phones — or two tills — cannot
+    // collide on a short key.
+    const actorId = request.participant?.id ?? request.staff?.id ?? 'anon';
+    const scope = `${request.method}:${request.url}:${actorId}`;
     const requestHash = createHash('sha256')
       .update(JSON.stringify(request.body ?? null))
       .digest('hex');

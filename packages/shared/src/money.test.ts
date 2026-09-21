@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addCents,
   assertCents,
+  changeForCash,
   changeRatio,
   clampCents,
   eurosToCents,
@@ -135,5 +136,21 @@ describe('changeRatio', () => {
 
   it('rejects a zero base', () => {
     expect(() => changeRatio(110, 0)).toThrow(MoneyError);
+  });
+});
+
+describe('changeForCash', () => {
+  it('gives the change owed at the till', () => {
+    expect(changeForCash(730, 1000)).toBe(270);
+    expect(changeForCash(730, 730)).toBe(0);
+  });
+
+  it('refuses to hand over a drink that was underpaid', () => {
+    expect(() => changeForCash(730, 700)).toThrow(MoneyError);
+  });
+
+  it('refuses amounts that are not whole cents', () => {
+    expect(() => changeForCash(730, 1000.5)).toThrow(MoneyError);
+    expect(() => changeForCash(-1, 1000)).toThrow(MoneyError);
   });
 });

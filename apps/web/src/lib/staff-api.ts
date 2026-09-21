@@ -1,4 +1,10 @@
-import type { EventAction, LoginRequest, ProductInput } from '@bolsa/shared';
+import type {
+  CounterPaymentMethod,
+  EventAction,
+  LoginRequest,
+  ProductInput,
+  QuoteResponse,
+} from '@bolsa/shared';
 import { ApiError } from './api';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
@@ -30,8 +36,24 @@ export interface StaffSummary {
   id: string;
   eventId: string;
   email: string;
-  role: 'STAFF' | 'ADMIN';
+  role: 'STAFF' | 'CASHIER' | 'ADMIN';
   pickupPoint: string | null;
+}
+
+export interface CounterOrder {
+  id: string;
+  status: string;
+  totalCents: number;
+  paymentMethod: string;
+  items: { id: string; productId: string; name: string; qty: number; unitPriceCents: number }[];
+  voucher: { id: string; shortCode: string; qr: string; status: string } | null;
+}
+
+export interface CounterSale {
+  order: CounterOrder;
+  method: CounterPaymentMethod;
+  cashReceivedCents: number | null;
+  changeCents: number | null;
 }
 
 export interface ScannedItem {
@@ -62,6 +84,7 @@ export interface AdminAlert {
 
 export interface AdminDashboard {
   alerts: AdminAlert[];
+  takings: { method: string; orders: number; revenueCents: number }[];
   status: string;
   fixedPrices: boolean;
   engineParams: Record<string, number | boolean>;
@@ -120,6 +143,18 @@ export const staffApi = {
       method: 'POST',
       body: JSON.stringify(body),
     }),
+};
+
+export const counterApi = {
+  quote: (body: { items: { productId: string; qty: number }[]; ageChecked: boolean }) =>
+    request<QuoteResponse>('/counter/quotes', { method: 'POST', body: JSON.stringify(body) }),
+
+  sell: (body: {
+    quoteId: string;
+    method: CounterPaymentMethod;
+    cashReceivedCents?: number;
+    nif?: string;
+  }) => request<CounterSale>('/counter/sales', { method: 'POST', body: JSON.stringify(body) }),
 };
 
 export const adminApi = {

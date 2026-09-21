@@ -15,6 +15,7 @@ export type {
   OrderStatus,
   Participant,
   Payment,
+  PaymentMethod,
   PaymentStatus,
   PriceTick,
   Product,

@@ -56,7 +56,18 @@ enum VoucherStatus {
 
 enum StaffRole {
   STAFF
+  /// Sells at the till, for customers who pay in cash or on the bar's own
+  /// card terminal instead of through the application.
+  CASHIER
   ADMIN
+}
+
+/// How the money actually reached the bar. MBWAY is the only one the
+/// application settles itself; the other two happen off the application.
+enum PaymentMethod {
+  MBWAY
+  CASH
+  CARD_TERMINAL
 }
 
 enum InvoiceStatus {
@@ -229,6 +240,11 @@ model Participant {
   phoneHash String? @map("phone_hash")
   sessionId String  @unique @map("session_id")
 
+  /// Created by the till for a walk-up customer who never opened the app.
+  /// One row per counter sale, so the per-person limits of L8 stay per person
+  /// instead of accumulating against the till itself.
+  isCounter Boolean @default(false) @map("is_counter")
+
   /// Set when the retention window closes and the row is anonymised.
   anonymizedAt DateTime? @map("anonymized_at") @db.Timestamptz(3)
 
@@ -272,6 +288,13 @@ model Order {
   /// L6: optional at checkout, validated when present.
   nif           String?
   paymentRef    String?     @map("payment_ref")
+  /// Spec 6.1 covers MB WAY; a bar also takes notes and cards on its own
+  /// terminal, and the end of the night has to reconcile against both.
+  paymentMethod PaymentMethod @default(MBWAY) @map("payment_method")
+  /// The cashier who rang it up. Null for anything the participant paid.
+  soldByStaffId String?     @map("sold_by_staff_id")
+  /// What was handed over in notes, to explain the change given. Cash only.
+  cashReceivedCents Int?    @map("cash_received_cents")
   /// Deadline for the pending payment; the worker expires it after this.
   expiresAt     DateTime    @map("expires_at") @db.Timestamptz(3)
 
@@ -280,6 +303,7 @@ model Order {
 
   participant Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   quote       Quote       @relation(fields: [quoteId], references: [id])
+  soldBy      StaffUser?  @relation("CounterSales", fields: [soldByStaffId], references: [id])
   items       OrderItem[]
   payments    Payment[]
   voucher     Voucher?
@@ -288,6 +312,7 @@ model Order {
 
   @@index([status, expiresAt])
   @@index([participantId, createdAt])
+  @@index([soldByStaffId, createdAt])
   @@map("orders")
 }
 
@@ -420,9 +445,10 @@ model StaffUser {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  event       Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  redemptions Redemption[]
-  refunds     Refund[]
+  event        Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  redemptions  Redemption[]
+  refunds      Refund[]
+  counterSales Order[]      @relation("CounterSales")
 
   @@unique([eventId, email])
   @@map("staff_users")

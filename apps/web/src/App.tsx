@@ -18,6 +18,7 @@ import { useCart } from './lib/store';
 import { AdminApp } from './routes/admin';
 import { CartScreen } from './routes/cart';
 import { CheckoutScreen } from './routes/checkout';
+import { CounterApp } from './routes/counter';
 import { JoinScreen } from './routes/join';
 import { MarketScreen } from './routes/market';
 import { PaymentScreen } from './routes/payment';
@@ -127,6 +128,7 @@ export function App(): React.JSX.Element {
 
       {/* Behind a staff session, not a participant one. */}
       <Route path="/staff" element={<StaffApp />} />
+      <Route path="/caixa" element={<CounterApp />} />
       <Route path="/admin" element={<AdminApp />} />
 
       <Route element={<ParticipantArea />}>

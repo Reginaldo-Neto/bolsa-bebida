@@ -8,8 +8,8 @@ import { NestFactory } from '@nestjs/core';
 import { URI, TOTP } from 'otpauth';
 
 /**
- * Creates an event with a catalogue, an administrator and a bar account, then
- * prints everything needed to try the product.
+ * Creates an event with a catalogue, an administrator, a bar account and a
+ * till account, then prints everything needed to try the product.
  *
  * Run with: pnpm --filter @bolsa/api event:create
  *
@@ -132,6 +132,7 @@ async function main(): Promise<void> {
 
   const adminPassword = process.env.SETUP_ADMIN_PASSWORD ?? 'admin-da-festa-2026';
   const staffPassword = process.env.SETUP_STAFF_PASSWORD ?? 'bar-da-festa-2026';
+  const cashierPassword = process.env.SETUP_CASHIER_PASSWORD ?? 'caixa-da-festa-2026';
   const eventName = process.env.SETUP_EVENT_NAME ?? 'Festa de teste';
 
   const eventId = newId();
@@ -193,6 +194,14 @@ async function main(): Promise<void> {
     role: 'STAFF',
     pickupPoint: 'Bar principal',
   });
+  // Sells to whoever pays in notes or on the bar's own card terminal.
+  await auth.createUser({
+    eventId,
+    email: 'caixa@festa.pt',
+    password: cashierPassword,
+    role: 'CASHIER',
+    pickupPoint: 'Bar principal',
+  });
 
   const web = process.env.SETUP_WEB_URL ?? 'http://localhost:5173';
   const otpauth = URI.stringify(
@@ -212,6 +221,7 @@ async function main(): Promise<void> {
   console.log('Enderecos:');
   console.log(`  Participante  ${web}/e/${eventId}`);
   console.log(`  Bar (staff)   ${web}/staff`);
+  console.log(`  Caixa         ${web}/caixa`);
   console.log(`  Administracao ${web}/admin`);
   console.log(`  Ecra da festa ${web}/screen?event=${eventId}`);
   console.log(`  Tabela precos ${web}/prices?event=${eventId}`);
@@ -219,6 +229,7 @@ async function main(): Promise<void> {
   console.log('Contas:');
   console.log(`  admin@festa.pt / ${adminPassword}`);
   console.log(`  bar@festa.pt   / ${staffPassword}`);
+  console.log(`  caixa@festa.pt / ${cashierPassword}`);
   console.log('');
   console.log('2FA do administrador. Adicione este segredo a uma aplicacao de');
   console.log('autenticacao (Google Authenticator, Aegis, 1Password):');

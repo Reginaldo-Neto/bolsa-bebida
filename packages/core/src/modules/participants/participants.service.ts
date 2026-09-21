@@ -65,6 +65,36 @@ export class ParticipantsService {
     return { participant: toContext(participant), sessionId };
   }
 
+  /**
+   * The customer standing at the till, who never opened the application.
+   *
+   * One row per sale rather than one row for the whole till. The alcohol cap
+   * of L8 is a limit on a person, and a single shared row would make the
+   * counter itself hit that cap after a handful of drinks and stop serving.
+   * Nothing personal is stored: no nickname they chose, no phone, and the
+   * ranking is off, because a walk-up customer never consented to any of it.
+   */
+  async createCounterCustomer(
+    eventId: string,
+    isAdultDeclared: boolean,
+  ): Promise<ParticipantContext> {
+    const id = newId();
+
+    const participant = await this.prisma.client.participant.create({
+      data: {
+        id,
+        eventId,
+        nickname: `Balcao ${id.slice(-8).toUpperCase()}`,
+        isAdultDeclared,
+        leaderboardOptIn: false,
+        isCounter: true,
+        sessionId: `counter:${id}`,
+      },
+    });
+
+    return toContext(participant);
+  }
+
   async findBySession(sessionId: string): Promise<ParticipantContext | null> {
     const participant = await this.prisma.client.participant.findUnique({ where: { sessionId } });
     return participant ? toContext(participant) : null;

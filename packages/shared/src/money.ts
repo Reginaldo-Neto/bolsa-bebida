@@ -133,6 +133,22 @@ export function eurosToCents(input: string | number): Cents {
   return cents;
 }
 
+/**
+ * Change owed at the till.
+ *
+ * Cash is the one place in this product where money moves back the other way,
+ * and a cashier working it out in their head at two in the morning with a
+ * queue in front of them is how a drawer ends the night short.
+ */
+export function changeForCash(totalCents: Cents, receivedCents: Cents): Cents {
+  assertNonNegativeCents(totalCents, 'totalCents');
+  assertNonNegativeCents(receivedCents, 'receivedCents');
+  if (receivedCents < totalCents) {
+    throw new MoneyError(`received (${receivedCents}) is less than the total (${totalCents})`);
+  }
+  return receivedCents - totalCents;
+}
+
 /** Percentage change against a base price, as a ratio (0.08 = +8%). */
 export function changeRatio(current: Cents, base: Cents): number {
   assertCents(current, 'current');

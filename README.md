@@ -94,6 +94,7 @@ O comando do passo 5 imprime estes endereços já com o identificador do evento:
 | --- | --- |
 | `/e/<idDoEvento>` | participante — é para aqui que o QR Code aponta |
 | `/staff` | bar, com a conta `bar@festa.pt` |
+| `/caixa` | caixa, com a conta `caixa@festa.pt` — vendas em numerário e na maquinha do bar |
 | `/admin` | organizador, com `admin@festa.pt` e o código de 2FA |
 | `/screen?event=<idDoEvento>` | ecrã grande da festa |
 | `/prices?event=<idDoEvento>` | tabela mínimo–máximo para imprimir e afixar (L2) |
@@ -105,6 +106,26 @@ WAY faria. Confirme, e o voucher aparece — pronto a ser lido em `/staff`.
 
 Esses botões só existem em desenvolvimento: o `import.meta.env.DEV` retira-os do build de produção
 e a API recusa a rota quando `NODE_ENV=production`.
+
+### O caixa
+
+Nem toda a gente paga com o telemóvel. A conta `CASHIER` abre `/caixa`, onde se monta a venda ao
+preço do momento e se fecha dizendo como é que o dinheiro entrou: numerário, ou o terminal de
+cartões do próprio bar, que não passa pela aplicação.
+
+Uma venda ao balcão percorre o mesmo caminho que uma compra por MB WAY: a mesma cotação com o
+preço bloqueado (L1), a mesma reserva de stock, o mesmo voucher assinado e o mesmo documento
+fiscal (L6). Só o pagamento é que não contacta gateway nenhum — já foi recebido quando o caixa
+confirma. O resultado é que uma venda em dinheiro mexe no mercado exatamente como qualquer outra.
+
+Cada venda ao balcão cria um cliente anónimo próprio em vez de partilharem todos uma conta de
+balcão: o limite de álcool por período da L8 é por pessoa, e um único registo partilhado faria o
+caixa inteiro bater no limite ao fim de meia dúzia de bebidas. Esse cliente não entra no ranking,
+porque não consentiu nada.
+
+O painel do organizador mostra o dinheiro recebido separado por forma de pagamento, e o relatório
+`caixa.csv` tem uma linha por venda com o método, o caixa que a registou, o dinheiro recebido e o
+troco — o suficiente para contar a gaveta ao fim da noite.
 
 ### Tema e idioma
 

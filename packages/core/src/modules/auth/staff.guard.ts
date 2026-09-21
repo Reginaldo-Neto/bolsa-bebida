@@ -1,3 +1,4 @@
+import type { StaffRole } from '@bolsa/db';
 import { DomainError } from '@bolsa/shared';
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -8,10 +9,20 @@ export interface RequestWithStaff extends FastifyRequest {
   staff?: StaffContext;
 }
 
-export const ADMIN_ONLY = 'admin-only';
+export const ALLOWED_ROLES = 'allowed-roles';
+
+/**
+ * Restricts a route to certain bar roles.
+ *
+ * ADMIN always passes: the person who can pause the market and change prices
+ * is not going to be stopped from opening the till. Everyone else needs their
+ * role named, so a STAFF account that only hands drinks over cannot sell.
+ */
+export const Roles = (...roles: StaffRole[]): MethodDecorator & ClassDecorator =>
+  SetMetadata(ALLOWED_ROLES, roles);
 
 /** Spec 3: admin routes are for ADMIN, never for STAFF. */
-export const AdminOnly = (): MethodDecorator & ClassDecorator => SetMetadata(ADMIN_ONLY, true);
+export const AdminOnly = (): MethodDecorator & ClassDecorator => Roles('ADMIN');
 
 @Injectable()
 export class StaffGuard implements CanActivate {
@@ -33,13 +44,18 @@ export class StaffGuard implements CanActivate {
       throw new DomainError('unauthorized', 'Sessao expirada. Volte a entrar.');
     }
 
-    const adminOnly = this.reflector.getAllAndOverride<boolean>(ADMIN_ONLY, [
+    const allowed = this.reflector.getAllAndOverride<StaffRole[]>(ALLOWED_ROLES, [
       context.getHandler(),
       context.getClass(),
     ]);
 
-    if (adminOnly && staff.role !== 'ADMIN') {
-      throw new DomainError('forbidden', 'Apenas administradores podem fazer isto.');
+    if (allowed?.length && staff.role !== 'ADMIN' && !allowed.includes(staff.role)) {
+      throw new DomainError(
+        'forbidden',
+        allowed.includes('ADMIN')
+          ? 'Apenas administradores podem fazer isto.'
+          : 'Esta conta nao tem permissao para fazer isto.',
+      );
     }
 
     request.staff = staff;

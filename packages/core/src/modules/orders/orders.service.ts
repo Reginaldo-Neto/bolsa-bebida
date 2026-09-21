@@ -1,4 +1,4 @@
-import { newId } from '@bolsa/db';
+import { newId, type PaymentMethod } from '@bolsa/db';
 import {
   DomainError,
   type OrderRequest,
@@ -27,6 +27,8 @@ export interface OrderSummary {
   expiresAt: string;
   /** The gateway's own reference. The mock provider's dev route needs it. */
   paymentRef: string | null;
+  /** MB WAY, or one of the two ways of paying at the till. */
+  paymentMethod: PaymentMethod;
   items: {
     id: string;
     productId: string;
@@ -66,38 +68,13 @@ export class OrdersService {
 
     const expiresAt = new Date(Date.now() + event.limits.paymentTimeoutSeconds * 1000);
 
-    const order = await this.prisma.client.$transaction(async (tx) => {
-      // Consuming the quote is conditional, so two taps on "pay" cannot create
-      // two orders from the same reservation.
-      const consumed = await tx.quote.updateMany({
-        where: { id: quote.id, status: 'ACTIVE' },
-        data: { status: 'CONSUMED' },
-      });
-      if (consumed.count === 0) {
-        throw new DomainError('quote-already-used', 'Esta cotacao ja deu origem a uma encomenda.');
-      }
-
-      return tx.order.create({
-        data: {
-          id: newId(),
-          participantId: participant.id,
-          quoteId: quote.id,
-          status: 'PENDING',
-          totalCents: quote.totalCents,
-          nif: request.nif ?? null,
-          expiresAt,
-          items: {
-            create: items.map((item) => ({
-              id: newId(),
-              productId: item.productId,
-              qty: item.qty,
-              unitPriceCents: item.unitPriceCents,
-              basePriceCentsAtPurchase: item.basePriceCents,
-            })),
-          },
-        },
-        include: { items: true },
-      });
+    const order = await this.consumeQuoteIntoOrder({
+      participantId: participant.id,
+      quote,
+      items,
+      expiresAt,
+      nif: request.nif ?? null,
+      paymentMethod: 'MBWAY',
     });
 
     // L7: the phone number reaches the gateway but is only ever stored hashed.
@@ -135,6 +112,115 @@ export class OrdersService {
     }
 
     return this.summary(order.id);
+  }
+
+  /**
+   * The till: money already in the drawer, or already on the bar's own card
+   * terminal, before this is called.
+   *
+   * It runs the same path as a MB WAY order — the same locked quote, the same
+   * reserved stock, the same voucher and the same fiscal document — and then
+   * settles the payment immediately instead of waiting for a webhook that is
+   * never coming, because there is no gateway involved.
+   */
+  async createAtCounter(input: {
+    participant: ParticipantContext;
+    quoteId: string;
+    method: 'CASH' | 'CARD_TERMINAL';
+    staffUserId: string;
+    cashReceivedCents: number | null;
+    nif: string | null;
+  }): Promise<OrderSummary> {
+    const event = await this.events.requirePurchasable(input.participant.eventId);
+    const quote = await this.quotes.consumableQuote(input.quoteId, input.participant.id);
+    const items = quote.items as unknown as QuoteItem[];
+
+    const order = await this.consumeQuoteIntoOrder({
+      participantId: input.participant.id,
+      quote,
+      items,
+      // Nothing is waiting to be paid, but the column is not nullable and the
+      // expiry job only ever looks at PENDING orders, which this stops being
+      // a moment later.
+      expiresAt: new Date(Date.now() + event.limits.paymentTimeoutSeconds * 1000),
+      nif: input.nif,
+      paymentMethod: input.method,
+      soldByStaffId: input.staffUserId,
+      cashReceivedCents: input.cashReceivedCents,
+    });
+
+    // Derived from the order id, so a retry of the same sale cannot record the
+    // money twice: the unique index on providerRef refuses the second one.
+    const providerRef = `counter:${order.id}`;
+
+    await this.prisma.client.payment.create({
+      data: {
+        id: newId(),
+        orderId: order.id,
+        provider: input.method === 'CASH' ? 'counter-cash' : 'counter-card-terminal',
+        providerRef,
+        status: 'PENDING',
+        amountCents: order.totalCents,
+      },
+    });
+    await this.prisma.client.order.update({
+      where: { id: order.id },
+      data: { paymentRef: providerRef },
+    });
+
+    await this.settle(providerRef, 'PAID');
+
+    return this.summary(order.id);
+  }
+
+  /**
+   * Turns a locked quote into an order. Consuming the quote is conditional, so
+   * two taps on "pay" cannot create two orders from the same reservation.
+   */
+  private async consumeQuoteIntoOrder(input: {
+    participantId: string;
+    quote: { id: string; totalCents: number };
+    items: readonly QuoteItem[];
+    expiresAt: Date;
+    nif: string | null;
+    paymentMethod: PaymentMethod;
+    soldByStaffId?: string;
+    cashReceivedCents?: number | null;
+  }) {
+    return this.prisma.client.$transaction(async (tx) => {
+      const consumed = await tx.quote.updateMany({
+        where: { id: input.quote.id, status: 'ACTIVE' },
+        data: { status: 'CONSUMED' },
+      });
+      if (consumed.count === 0) {
+        throw new DomainError('quote-already-used', 'Esta cotacao ja deu origem a uma encomenda.');
+      }
+
+      return tx.order.create({
+        data: {
+          id: newId(),
+          participantId: input.participantId,
+          quoteId: input.quote.id,
+          status: 'PENDING',
+          totalCents: input.quote.totalCents,
+          nif: input.nif,
+          expiresAt: input.expiresAt,
+          paymentMethod: input.paymentMethod,
+          soldByStaffId: input.soldByStaffId ?? null,
+          cashReceivedCents: input.cashReceivedCents ?? null,
+          items: {
+            create: input.items.map((item) => ({
+              id: newId(),
+              productId: item.productId,
+              qty: item.qty,
+              unitPriceCents: item.unitPriceCents,
+              basePriceCentsAtPurchase: item.basePriceCents,
+            })),
+          },
+        },
+        include: { items: true },
+      });
+    });
   }
 
   /**
@@ -263,6 +349,7 @@ export class OrdersService {
     createdAt: Date;
     expiresAt: Date;
     paymentRef: string | null;
+    paymentMethod: PaymentMethod;
     items: {
       id: string;
       productId: string;
@@ -286,6 +373,7 @@ export class OrdersService {
       createdAt: order.createdAt.toISOString(),
       expiresAt: order.expiresAt.toISOString(),
       paymentRef: order.paymentRef,
+      paymentMethod: order.paymentMethod,
       items: order.items.map((item) => ({
         id: item.id,
         productId: item.productId,

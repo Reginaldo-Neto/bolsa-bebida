@@ -34,6 +34,8 @@ export interface AdminMetricsView {
   pendingOrders: number;
   lowStockProducts: number;
   lastTickAt: string | null;
+  /** The cash-up, live: what has to be in the drawer and on the terminal. */
+  takings: { method: string; orders: number; revenueCents: number }[];
   products: {
     id: string;
     name: string;
@@ -273,35 +275,47 @@ export class AdminService {
   async metrics(eventId: string): Promise<AdminMetricsView> {
     const event = await this.events.findById(eventId);
 
-    const [products, paidItems, pendingOrders, stuckPayments, failedInvoices] = await Promise.all([
-      this.prisma.client.product.findMany({
-        where: { eventId, archived: false },
-        include: { engineState: true },
-        orderBy: { sortOrder: 'asc' },
-      }),
-      this.prisma.client.orderItem.findMany({
-        where: {
-          product: { eventId },
-          order: { status: { in: ['PAID', 'PARTIALLY_REDEEMED', 'REDEEMED'] } },
-        },
-        select: { productId: true, qty: true, unitPriceCents: true },
-      }),
-      this.prisma.client.order.count({
-        where: { participant: { eventId }, status: 'PENDING' },
-      }),
-      // A payment still pending long after it was started means the gateway's
-      // webhook never arrived (spec 13.3).
-      this.prisma.client.payment.count({
-        where: {
-          status: 'PENDING',
-          createdAt: { lt: new Date(Date.now() - 60_000) },
-          order: { participant: { eventId } },
-        },
-      }),
-      this.prisma.client.invoice.count({
-        where: { status: 'FAILED', order: { participant: { eventId } } },
-      }),
-    ]);
+    const [products, paidItems, takings, pendingOrders, stuckPayments, failedInvoices] =
+      await Promise.all([
+        this.prisma.client.product.findMany({
+          where: { eventId, archived: false },
+          include: { engineState: true },
+          orderBy: { sortOrder: 'asc' },
+        }),
+        this.prisma.client.orderItem.findMany({
+          where: {
+            product: { eventId },
+            order: { status: { in: ['PAID', 'PARTIALLY_REDEEMED', 'REDEEMED'] } },
+          },
+          select: { productId: true, qty: true, unitPriceCents: true },
+        }),
+        // Spec 12.2: the organiser counting the drawer at four in the morning
+        // needs the number to count against, not a spreadsheet to build first.
+        this.prisma.client.order.groupBy({
+          by: ['paymentMethod'],
+          where: {
+            participant: { eventId },
+            status: { in: ['PAID', 'PARTIALLY_REDEEMED', 'REDEEMED'] },
+          },
+          _count: { _all: true },
+          _sum: { totalCents: true },
+        }),
+        this.prisma.client.order.count({
+          where: { participant: { eventId }, status: 'PENDING' },
+        }),
+        // A payment still pending long after it was started means the gateway's
+        // webhook never arrived (spec 13.3).
+        this.prisma.client.payment.count({
+          where: {
+            status: 'PENDING',
+            createdAt: { lt: new Date(Date.now() - 60_000) },
+            order: { participant: { eventId } },
+          },
+        }),
+        this.prisma.client.invoice.count({
+          where: { status: 'FAILED', order: { participant: { eventId } } },
+        }),
+      ]);
 
     const soldByProduct = new Map<string, number>();
     let revenueCents = 0;
@@ -329,6 +343,11 @@ export class AdminService {
         (product) =>
           product.stockInitial > 0 && product.stockAvailable / product.stockInitial < 0.1,
       ).length,
+      takings: takings.map((row) => ({
+        method: row.paymentMethod,
+        orders: row._count._all,
+        revenueCents: row._sum.totalCents ?? 0,
+      })),
       lastTickAt: event.lastTickAt?.toISOString() ?? null,
       products: products.map((product) => ({
         id: product.id,

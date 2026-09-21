@@ -120,6 +120,26 @@ function AdminDashboard(): React.JSX.Element {
         <Metric label={t('admin.lowStock')} value={String(data?.lowStockProducts ?? 0)} />
       </section>
 
+      {/* Spec 12.2: what has to be in the drawer and on the terminal roll. */}
+      {data && data.takings.length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">{t('admin.takings')}</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {data.takings.map((row) => (
+              <Card key={row.method}>
+                <p className="text-sm text-muted">{methodLabel(t, row.method)}</p>
+                <p className="mt-1 text-price font-bold tabular">
+                  {format.money(row.revenueCents)}
+                </p>
+                <p className="text-xs text-muted">
+                  {t('admin.takingsOrders', { orders: row.orders })}
+                </p>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="mt-6">
         <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">
           {t('admin.eventControl')}
@@ -213,6 +233,18 @@ function AdminDashboard(): React.JSX.Element {
       </section>
     </main>
   );
+}
+
+const METHOD_KEYS: Record<string, TranslationKey> = {
+  MBWAY: 'admin.method.MBWAY',
+  CASH: 'admin.method.CASH',
+  CARD_TERMINAL: 'admin.method.CARD_TERMINAL',
+};
+
+/** An unknown method is shown as it is stored, rather than hidden. */
+function methodLabel(t: (key: TranslationKey) => string, method: string): string {
+  const key = METHOD_KEYS[method];
+  return key ? t(key) : method;
 }
 
 function Metric({ label, value }: { label: string; value: string }): React.JSX.Element {

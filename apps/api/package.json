@@ -12,7 +12,8 @@
     "test": "vitest run --passWithNoTests",
     "test:watch": "vitest",
     "keys:generate": "node dist/cli/generate-keys.js",
-    "event:create": "node dist/cli/setup.js"
+    "event:create": "node dist/cli/setup.js",
+    "staff:create": "node dist/cli/staff.js"
   },
   "dependencies": {
     "@bolsa/core": "workspace:*",

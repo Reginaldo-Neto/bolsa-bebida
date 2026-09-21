@@ -109,3 +109,27 @@ export class DomainError extends Error {
     });
   }
 }
+
+/** The parts of a ZodError the API needs, without depending on the class. */
+export interface ZodLikeError {
+  name: string;
+  issues: { path: (string | number)[]; message: string }[];
+}
+
+/**
+ * `error instanceof ZodError` is not safe across a package boundary.
+ *
+ * The schemas live here and are thrown from here, while the HTTP layer that
+ * catches them lives in another package with its own resolution of the zod
+ * module — CommonJS on one side, ESM on the other, two distinct classes with
+ * the same name. The failure is silent and expensive: every invalid request
+ * falls through to a 500 instead of the 400 that names the bad field. The
+ * shape, unlike the identity, is the same on both sides.
+ */
+export function isZodLikeError(error: unknown): error is ZodLikeError {
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+  const candidate = error as { name?: unknown; issues?: unknown };
+  return candidate.name === 'ZodError' && Array.isArray(candidate.issues);
+}

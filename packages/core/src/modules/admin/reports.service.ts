@@ -24,6 +24,8 @@ export class ReportsService {
         return this.redemptions(eventId);
       case 'reembolsos':
         return this.refunds(eventId);
+      case 'caixa':
+        return this.till(eventId);
     }
   }
 
@@ -38,6 +40,8 @@ export class ReportsService {
             status: true,
             createdAt: true,
             nif: true,
+            paymentMethod: true,
+            soldBy: { select: { email: true } },
             participant: { select: { nickname: true } },
           },
         },
@@ -51,6 +55,8 @@ export class ReportsService {
         'estado',
         'criada_em',
         'participante',
+        'metodo_pagamento',
+        'caixa',
         'nif',
         'produto',
         'quantidade',
@@ -64,6 +70,8 @@ export class ReportsService {
         item.order.status,
         item.order.createdAt.toISOString(),
         item.order.participant.nickname,
+        item.order.paymentMethod,
+        item.order.soldBy?.email ?? '',
         item.order.nif ?? '',
         item.product.name,
         item.qty,
@@ -135,6 +143,55 @@ export class ReportsService {
         redemption.staffUser.email,
         redemption.pickupPoint ?? '',
         redemption.ageChecked ? 'sim' : 'nao',
+      ]),
+    );
+  }
+
+  /**
+   * The cash-up: one line per paid order, with how the money arrived.
+   *
+   * MB WAY orders are here too, even though nobody has to count them, because
+   * the point of this file is to reconcile the drawer and the terminal roll
+   * against the total the event took. Leaving out a third of the money would
+   * make that impossible.
+   */
+  private async till(eventId: string): Promise<string> {
+    const orders = await this.prisma.client.order.findMany({
+      where: {
+        participant: { eventId },
+        status: { in: ['PAID', 'PARTIALLY_REDEEMED', 'REDEEMED', 'REFUNDED'] },
+      },
+      include: {
+        soldBy: { select: { email: true } },
+        voucher: { select: { shortCode: true } },
+      },
+      orderBy: [{ paymentMethod: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    return toCsv(
+      [
+        'momento',
+        'metodo',
+        'caixa',
+        'encomenda',
+        'voucher',
+        'total_centimos',
+        'dinheiro_recebido_centimos',
+        'troco_centimos',
+        'estado',
+        'nif',
+      ],
+      orders.map((order) => [
+        order.createdAt.toISOString(),
+        order.paymentMethod,
+        order.soldBy?.email ?? '',
+        order.id,
+        order.voucher?.shortCode ?? '',
+        order.totalCents,
+        order.cashReceivedCents ?? '',
+        order.cashReceivedCents === null ? '' : order.cashReceivedCents - order.totalCents,
+        order.status,
+        order.nif ?? '',
       ]),
     );
   }

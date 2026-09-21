@@ -27,7 +27,9 @@ describeWithDatabase('leaderboard', () => {
     await resetDatabase(client);
     event = await seedEvent(client, {
       products: [{ name: 'Fino', basePriceCents: 200, stock: 500 }],
-      limits: { maxQtyPerProduct: 10, alcoholUnitsPerWindow: 100 },
+      // 50 is the highest the schema allows (L8); the test only needs enough
+      // room for a handful of participants to buy ten each.
+      limits: { maxQtyPerProduct: 10, alcoholUnitsPerWindow: 50 },
     });
   });
 

@@ -25,6 +25,9 @@ export { MarketModule } from './modules/market/market.module';
 export { MarketService, stockStatusOf, type PricePoint } from './modules/market/market.service';
 export { TickService, type TickResult } from './modules/market/tick.service';
 
+export { CounterModule } from './modules/counter/counter.module';
+export { CounterService, type CounterSaleResult } from './modules/counter/counter.service';
+
 export { OrdersModule } from './modules/orders/orders.module';
 export { OrdersService, type OrderSummary } from './modules/orders/orders.service';
 export { ExpiryService } from './modules/orders/expiry.service';

@@ -53,8 +53,15 @@ export default defineConfig({
   // of pre-bundling by default. Without this, the dev server cannot see some
   // of their named exports, while the production build (rollup) can — so the
   // app would only break in development.
+  //
+  // `force` is here because the cache key does not include a linked package's
+  // built output: add an export to @bolsa/shared and the dev server keeps
+  // serving yesterday's bundle, failing with "x is not a function" on a symbol
+  // that plainly exists. Re-optimising on every start costs about a second and
+  // removes the whole class of confusion.
   optimizeDeps: {
     include: ['@bolsa/shared'],
+    force: true,
   },
 
   server: {
