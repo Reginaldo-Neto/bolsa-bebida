@@ -5,6 +5,7 @@ import { changeRatio, eventAllowsPriceTicks, eventRoom } from '@bolsa/shared';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../common/prisma.service';
 import { EventsService } from '../events/events.service';
+import { LeaderboardService } from '../leaderboard/leaderboard.service';
 import { RealtimePublisher } from '../realtime/realtime.publisher';
 import { stockStatusOf } from './market.service';
 
@@ -27,6 +28,7 @@ export class TickService {
     private readonly prisma: PrismaService,
     private readonly events: EventsService,
     private readonly realtime: RealtimePublisher,
+    private readonly leaderboard: LeaderboardService,
   ) {}
 
   async runFor(eventId: string, now: Date = new Date()): Promise<TickResult> {
@@ -84,6 +86,8 @@ export class TickService {
       }
     }
 
+    await this.publishLeaderboard(eventId);
+
     return {
       eventId,
       tick,
@@ -91,6 +95,28 @@ export class TickService {
         output.products.map((product) => [product.productId, product.currentPrice]),
       ),
     };
+  }
+
+  /**
+   * Spec 10.2: the ranking is recomputed with the prices, because a purchase
+   * that moved the market also changed who bought well. Never fails the tick:
+   * prices are the job, the ranking is decoration.
+   */
+  private async publishLeaderboard(eventId: string): Promise<void> {
+    try {
+      const board = await this.leaderboard.view(eventId);
+      this.realtime.publish(eventRoom(eventId), 'leaderboard.updated', {
+        eventId,
+        entries: board.entries.map((entry) => ({
+          position: entry.position,
+          nickname: entry.nickname,
+          points: entry.points,
+          teamCode: entry.teamCode,
+        })),
+      });
+    } catch (error) {
+      this.logger.warn({ err: error, eventId }, 'nao foi possivel atualizar o ranking');
+    }
   }
 
   /**

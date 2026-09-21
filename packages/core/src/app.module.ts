@@ -7,6 +7,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { EventsModule } from './modules/events/events.module';
+import { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
 import { MarketModule } from './modules/market/market.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ParticipantsModule } from './modules/participants/participants.module';
@@ -31,6 +32,7 @@ import { RealtimeGatewayModule } from './modules/realtime/realtime-gateway.modul
     EventsModule,
     ParticipantsModule,
     MarketModule,
+    LeaderboardModule,
     QuotesModule,
     OrdersModule,
     StaffModule,

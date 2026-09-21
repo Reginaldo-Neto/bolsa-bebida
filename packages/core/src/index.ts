@@ -78,3 +78,10 @@ export {
   type InvoiceRequest,
   type InvoiceResult,
 } from './modules/invoicing/invoicing-provider';
+
+export { LeaderboardModule } from './modules/leaderboard/leaderboard.module';
+export {
+  LeaderboardService,
+  type LeaderboardView,
+  type RankedEntry,
+} from './modules/leaderboard/leaderboard.service';

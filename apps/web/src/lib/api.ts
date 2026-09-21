@@ -96,6 +96,20 @@ export interface OrderSummary {
   voucher: { id: string; shortCode: string; qr: string; status: string } | null;
 }
 
+export interface LeaderboardEntry {
+  participantId: string;
+  nickname: string;
+  teamCode: string | null;
+  points: number;
+  position: number;
+}
+
+export interface LeaderboardView {
+  entries: LeaderboardEntry[];
+  me: (LeaderboardEntry & { optedIn: boolean }) | null;
+  teams: { teamCode: string; points: number; members: number; position: number }[];
+}
+
 export interface PricePoint {
   tick: number;
   priceCents: number;
@@ -131,6 +145,14 @@ export const api = {
     }),
 
   myOrders: () => request<OrderSummary[]>('/me/orders'),
+
+  leaderboard: () => request<LeaderboardView>('/leaderboard'),
+
+  setLeaderboardOptIn: (optIn: boolean) =>
+    request<{ optedIn: boolean }>('/me/leaderboard', {
+      method: 'POST',
+      body: JSON.stringify({ optIn }),
+    }),
 
   /**
    * Development only: stands in for the participant confirming in the MB WAY

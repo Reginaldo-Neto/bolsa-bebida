@@ -51,25 +51,6 @@ export function HelpScreen(): React.JSX.Element {
   );
 }
 
-/** Spec 4.6: the ranking lands in F6; this explains what it will measure. */
-export function RankingScreen(): React.JSX.Element {
-  return (
-    <>
-      <AppHeader title="Melhor Trader" />
-      <main className="mx-auto max-w-lg px-4 pb-6">
-        <Card className="mt-3">
-          <h2 className="font-semibold">Ainda nao ha ranking nesta festa</h2>
-          <p className="mt-2 text-sm text-muted">
-            A pontuacao mede a qualidade das compras: quanto melhor a cotacao a que comprou face ao
-            preco base, mais pontos. Contam no maximo as primeiras dez unidades, por isso beber mais
-            nunca da mais pontos.
-          </p>
-        </Card>
-      </main>
-    </>
-  );
-}
-
 export function NotFoundScreen(): React.JSX.Element {
   return (
     <main className="grid min-h-dvh place-items-center p-6 text-center">

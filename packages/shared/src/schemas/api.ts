@@ -224,3 +224,8 @@ export const refundSchema = z.object({
 
 export const REPORT_TYPES = ['vendas', 'precos', 'levantamentos', 'reembolsos'] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
+
+/** POST /me/leaderboard: spec 4.6 lets a participant leave at any time. */
+export const leaderboardOptInSchema = z.object({ optIn: z.boolean() });
+
+export type LeaderboardOptInRequest = z.infer<typeof leaderboardOptInSchema>;

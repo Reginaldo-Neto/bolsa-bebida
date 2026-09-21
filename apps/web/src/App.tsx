@@ -12,9 +12,10 @@ import { JoinScreen } from './routes/join';
 import { MarketScreen } from './routes/market';
 import { PaymentScreen } from './routes/payment';
 import { PricesScreen } from './routes/prices';
+import { RankingScreen } from './routes/ranking';
 import { PublicScreen } from './routes/screen';
 import { StaffApp } from './routes/staff';
-import { HelpScreen, NotFoundScreen, RankingScreen } from './routes/static-pages';
+import { HelpScreen, NotFoundScreen } from './routes/static-pages';
 import { VoucherDetailScreen, VouchersScreen } from './routes/vouchers';
 
 /** The QR Code at the venue points here; it only records which event this is. */
