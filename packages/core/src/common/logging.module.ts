@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Global, Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { LoggerModule } from 'nestjs-pino';
 import type { Env } from '../config/env';
@@ -9,7 +9,12 @@ import type { Env } from '../config/env';
  *
  * Pretty-printed in development, where a human reads them; JSON in production,
  * where a log collector does.
+ *
+ * Global because @InjectPinoLogger(Name) resolves a provider created per
+ * context by LoggerModule. Without this, every module would have to import
+ * logging before it could log.
  */
+@Global()
 @Module({
   imports: [
     LoggerModule.forRootAsync({

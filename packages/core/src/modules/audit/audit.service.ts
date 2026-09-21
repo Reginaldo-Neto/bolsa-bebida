@@ -1,6 +1,6 @@
 import { Prisma, newId, type ActorType, type AuditLog, type PrismaTransaction } from '@bolsa/db';
 import { Injectable } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../../common/prisma.service';
 
 export interface AuditEntry {
@@ -26,8 +26,10 @@ export interface AuditEntry {
 export class AuditService {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectPinoLogger(AuditService.name) private readonly logger: PinoLogger,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(AuditService.name);
+  }
 
   async record(entry: AuditEntry, tx?: PrismaTransaction): Promise<void> {
     const client = tx ?? this.prisma.client;

@@ -1,4 +1,5 @@
 import {
+  AuditModule,
   CommonModule,
   EventsModule,
   InvoicingModule,
@@ -22,11 +23,12 @@ import { SchedulerService } from './scheduler.service';
     }),
     LoggingModule,
     CommonModule,
+    // Global, but a global module still has to be imported somewhere.
+    AuditModule,
     EventsModule,
     MarketModule,
     OrdersModule,
     InvoicingModule,
-    LoggingModule,
     ParticipantsModule,
   ],
   providers: [SchedulerService],

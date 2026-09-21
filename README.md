@@ -59,7 +59,7 @@ corepack pnpm build
 **5. Criar uma festa de teste**
 
 ```bash
-corepack pnpm --filter @bolsa/api setup
+corepack pnpm --filter @bolsa/api event:create
 ```
 
 Isto cria o evento já aberto, sete bebidas em três grupos de substituição, uma conta de

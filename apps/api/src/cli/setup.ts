@@ -11,7 +11,7 @@ import { URI, TOTP } from 'otpauth';
  * Creates an event with a catalogue, an administrator and a bar account, then
  * prints everything needed to try the product.
  *
- * Run with: pnpm --filter @bolsa/api setup
+ * Run with: pnpm --filter @bolsa/api event:create
  *
  * It goes through the real AuthService rather than writing rows directly, so
  * the password hashing and the TOTP secret are produced exactly as they are in

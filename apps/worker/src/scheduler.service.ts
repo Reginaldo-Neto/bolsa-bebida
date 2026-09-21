@@ -10,7 +10,7 @@ import type { Env } from '@bolsa/core';
 import { PAYMENT_POLL_INTERVAL_SECONDS, parseEngineParams } from '@bolsa/shared';
 import { Injectable, type OnModuleDestroy, type OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
 
@@ -39,8 +39,9 @@ export class SchedulerService implements OnModuleInit, OnModuleDestroy {
     private readonly poller: PaymentPollerService,
     private readonly invoicing: InvoicingService,
     private readonly retention: RetentionService,
-    @InjectPinoLogger(SchedulerService.name) private readonly logger: PinoLogger,
+    private readonly logger: PinoLogger,
   ) {
+    this.logger.setContext(SchedulerService.name);
     this.connection = new Redis(this.config.get('REDIS_URL', { infer: true }), {
       maxRetriesPerRequest: null,
     });

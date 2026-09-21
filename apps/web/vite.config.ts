@@ -49,6 +49,14 @@ export default defineConfig({
       },
     }),
   ],
+  // The workspace packages are CommonJS, and Vite leaves linked packages out
+  // of pre-bundling by default. Without this, the dev server cannot see some
+  // of their named exports, while the production build (rollup) can — so the
+  // app would only break in development.
+  optimizeDeps: {
+    include: ['@bolsa/shared'],
+  },
+
   server: {
     port: 5173,
     proxy: {

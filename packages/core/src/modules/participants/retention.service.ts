@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from '../../common/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
@@ -20,8 +20,10 @@ export class RetentionService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
-    @InjectPinoLogger(RetentionService.name) private readonly logger: PinoLogger,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(RetentionService.name);
+  }
 
   async anonymizeExpired(now: Date = new Date()): Promise<number> {
     const events = await this.prisma.client.event.findMany({

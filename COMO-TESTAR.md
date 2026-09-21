@@ -66,7 +66,7 @@ corepack pnpm build
 **2.5 — Criar a festa de teste**
 
 ```bash
-corepack pnpm --filter @bolsa/api setup
+corepack pnpm --filter @bolsa/api event:create
 ```
 
 Imprime um bloco com os endereços, as contas e o **segredo de 2FA do administrador**.

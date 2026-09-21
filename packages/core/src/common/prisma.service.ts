@@ -14,7 +14,9 @@ export class PrismaService implements OnModuleDestroy {
   constructor(config: ConfigService<Env, true>) {
     this.client = createPrismaClient({
       databaseUrl: config.get('DATABASE_URL', { infer: true }),
-      logQueries: config.get('NODE_ENV', { infer: true }) === 'development',
+      // Off unless asked for: every query on screen buries the lines that
+      // actually say what the system did.
+      logQueries: process.env.LOG_QUERIES === 'true',
     });
   }
 

@@ -4,7 +4,7 @@ import { CallHandler, ExecutionContext, Injectable, type NestInterceptor } from 
 import type { FastifyRequest } from 'fastify';
 import { type Observable, from, of, switchMap } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { InjectPinoLogger, PinoLogger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 import { PrismaService } from './prisma.service';
 
 interface RequestWithParticipant extends FastifyRequest {
@@ -23,8 +23,10 @@ interface RequestWithParticipant extends FastifyRequest {
 export class IdempotencyInterceptor implements NestInterceptor {
   constructor(
     private readonly prisma: PrismaService,
-    @InjectPinoLogger(IdempotencyInterceptor.name) private readonly logger: PinoLogger,
-  ) {}
+    private readonly logger: PinoLogger,
+  ) {
+    this.logger.setContext(IdempotencyInterceptor.name);
+  }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const request = context.switchToHttp().getRequest<RequestWithParticipant>();

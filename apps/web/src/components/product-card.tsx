@@ -9,6 +9,26 @@ const STOCK_LABELS = {
   SOLD_OUT: 'Esgotado',
 } as const;
 
+/**
+ * Volume, category and, for a soft drink, the fact that it is one — without
+ * saying it twice when the category already does.
+ */
+function describe(product: MarketProduct): string {
+  const parts = [formatVolume(product.volumeMl), product.category].filter((part): part is string =>
+    Boolean(part),
+  );
+
+  const softDrink = 'Sem alcool';
+  if (
+    !product.isAlcoholic &&
+    !parts.some((part) => part.toLowerCase() === softDrink.toLowerCase())
+  ) {
+    parts.push(softDrink);
+  }
+
+  return parts.join(' · ');
+}
+
 export function ProductCard({
   product,
   qty,
@@ -36,10 +56,7 @@ export function ProductCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-semibold">{product.name}</h3>
-          <p className="text-sm text-muted">
-            {[formatVolume(product.volumeMl), product.category].filter(Boolean).join(' · ')}
-            {!product.isAlcoholic && ' · Sem alcool'}
-          </p>
+          <p className="text-sm text-muted">{describe(product)}</p>
         </div>
         <Sparkline values={history} direction={direction} />
       </div>
