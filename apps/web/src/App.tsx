@@ -1,9 +1,19 @@
 import { useQuery } from '@tanstack/react-query';
 import { useEffect } from 'react';
-import { Navigate, Outlet, Route, Routes, useNavigate, useParams } from 'react-router-dom';
+import {
+  Navigate,
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
 import { BottomNav } from './components/chrome';
 import { Spinner } from './components/ui';
+import { useTranslation } from './i18n';
 import { ApiError, api } from './lib/api';
+import { applySettings, themeForPath, useSettings } from './lib/settings';
 import { useCart } from './lib/store';
 import { AdminApp } from './routes/admin';
 import { CartScreen } from './routes/cart';
@@ -19,8 +29,24 @@ import { StaffApp } from './routes/staff';
 import { HelpScreen, NotFoundScreen } from './routes/static-pages';
 import { VoucherDetailScreen, VouchersScreen } from './routes/vouchers';
 
+/**
+ * The theme and the language live on <html>: the CSS custom properties read
+ * data-theme, and a screen reader reads lang. Both have to be written before
+ * anything is painted, which is why this sits above every route.
+ */
+function useAppliedSettings(): void {
+  const theme = useSettings((state) => state.theme);
+  const locale = useSettings((state) => state.locale);
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    applySettings(themeForPath(pathname, theme), locale);
+  }, [pathname, theme, locale]);
+}
+
 /** The QR Code at the venue points here; it only records which event this is. */
 function EnterEvent(): React.JSX.Element {
+  const { t } = useTranslation();
   const { eventId } = useParams<{ eventId: string }>();
   const setEventId = useCart((state) => state.setEventId);
   const navigate = useNavigate();
@@ -32,7 +58,7 @@ function EnterEvent(): React.JSX.Element {
     void navigate('/', { replace: true });
   }, [eventId, setEventId, navigate]);
 
-  return <Spinner label="A entrar" />;
+  return <Spinner label={t('join.submitting')} />;
 }
 
 /**
@@ -40,6 +66,7 @@ function EnterEvent(): React.JSX.Element {
  * joining is there, or the participant sees the entry screen again.
  */
 function ParticipantArea(): React.JSX.Element {
+  const { t } = useTranslation();
   const eventId = useCart((state) => state.eventId);
 
   const snapshot = useQuery({
@@ -60,10 +87,8 @@ function ParticipantArea(): React.JSX.Element {
     return (
       <main className="grid min-h-dvh place-items-center p-6 text-center">
         <div>
-          <h1 className="text-2xl font-bold">Leia o codigo QR no local</h1>
-          <p className="mt-3 text-muted">
-            A entrada no mercado faz-se pelo codigo QR afixado no bar ou no ecra da festa.
-          </p>
+          <h1 className="text-2xl font-bold">{t('join.needQr')}</h1>
+          <p className="mt-3 text-muted">{t('join.needQrHint')}</p>
         </div>
       </main>
     );
@@ -88,6 +113,8 @@ function ParticipantArea(): React.JSX.Element {
 }
 
 export function App(): React.JSX.Element {
+  useAppliedSettings();
+
   return (
     <Routes>
       <Route path="/e/:eventId" element={<EnterEvent />} />

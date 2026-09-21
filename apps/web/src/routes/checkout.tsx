@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppHeader } from '../components/chrome';
 import { Alert, Button, Card, Field, Spinner, StickyActions, inputClass } from '../components/ui';
+import { useTranslation } from '../i18n';
 import { ApiError, api } from '../lib/api';
-import { formatCents, secondsUntil } from '../lib/format';
+import { secondsUntil, useFormatters } from '../lib/format';
 import { useCart } from '../lib/store';
 
 /**
@@ -13,6 +14,8 @@ import { useCart } from '../lib/store';
  * visible, and the amount charged is exactly the amount on this screen.
  */
 export function CheckoutScreen(): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const lines = useCart((state) => state.lines);
   const clear = useCart((state) => state.clear);
   const navigate = useNavigate();
@@ -35,10 +38,10 @@ export function CheckoutScreen(): React.JSX.Element {
     mutationFn: async () => {
       const parsedPhone = phoneSchema.safeParse(phone);
       if (!parsedPhone.success) {
-        throw new Error('Indique um numero de telemovel portugues valido.');
+        throw new Error(t('checkout.phoneInvalid'));
       }
       if (nif.trim() && !nifSchema.safeParse(nif).success) {
-        throw new Error('O NIF indicado nao e valido.');
+        throw new Error(t('checkout.nifInvalid'));
       }
 
       const trimmedNif = nif.trim();
@@ -84,7 +87,7 @@ export function CheckoutScreen(): React.JSX.Element {
   const expired = Boolean(quote) && remaining <= 0;
 
   if (createQuote.isPending && !quote) {
-    return <Spinner label="A bloquear os precos" />;
+    return <Spinner label={t('checkout.locking')} />;
   }
 
   if (createQuote.isError) {
@@ -92,14 +95,14 @@ export function CheckoutScreen(): React.JSX.Element {
     return (
       <div className="mx-auto max-w-lg p-4">
         <Alert tone="error">
-          {error instanceof ApiError ? error.message : 'Nao foi possivel criar a cotacao.'}
+          {error instanceof ApiError ? error.message : t('checkout.quoteFailed')}
         </Alert>
         <Button
           variant="secondary"
           className="mt-4 w-full"
           onClick={() => void navigate('/carrinho')}
         >
-          Voltar ao carrinho
+          {t('checkout.backToCart')}
         </Button>
       </div>
     );
@@ -107,7 +110,7 @@ export function CheckoutScreen(): React.JSX.Element {
 
   return (
     <>
-      <AppHeader title="Pagamento" />
+      <AppHeader title={t('checkout.title')} />
 
       <main className="mx-auto max-w-lg px-4 pb-4">
         {/* L1: the lock and its remaining time, stated plainly. */}
@@ -119,14 +122,12 @@ export function CheckoutScreen(): React.JSX.Element {
           }`}
         >
           {expired ? (
-            <p className="font-semibold text-down">A cotacao expirou.</p>
+            <p className="font-semibold text-down">{t('checkout.expired')}</p>
           ) : (
             <>
-              <p className="text-sm text-muted">Precos bloqueados durante</p>
+              <p className="text-sm text-muted">{t('checkout.lockedFor')}</p>
               <p className="text-price-lg font-bold tabular text-accent">{remaining}s</p>
-              <p className="mt-1 text-sm text-muted">
-                O valor cobrado e exatamente o que esta aqui.
-              </p>
+              <p className="mt-1 text-sm text-muted">{t('checkout.lockedNote')}</p>
             </>
           )}
         </div>
@@ -138,14 +139,14 @@ export function CheckoutScreen(): React.JSX.Element {
                 <span>
                   {item.qty}× {item.name}
                 </span>
-                <span className="tabular">{formatCents(item.lineTotalCents)}</span>
+                <span className="tabular">{format.money(item.lineTotalCents)}</span>
               </li>
             ))}
           </ul>
           <div className="mt-3 flex items-baseline justify-between border-t border-line pt-3">
-            <span className="text-muted">Total</span>
+            <span className="text-muted">{t('common.total')}</span>
             <span className="text-price font-bold tabular">
-              {formatCents(quote?.totalCents ?? 0)}
+              {format.money(quote?.totalCents ?? 0)}
             </span>
           </div>
         </Card>
@@ -158,7 +159,7 @@ export function CheckoutScreen(): React.JSX.Element {
               createQuote.mutate();
             }}
           >
-            Ver os precos atuais
+            {t('checkout.seeCurrent')}
           </Button>
         ) : (
           <form
@@ -170,8 +171,8 @@ export function CheckoutScreen(): React.JSX.Element {
             }}
           >
             <Field
-              label="Telemovel MB WAY"
-              hint="Recebe o pedido de pagamento na aplicacao MB WAY."
+              label={t('checkout.phone')}
+              hint={t('checkout.phoneHint')}
               {...(formError ? { error: formError } : {})}
             >
               <input
@@ -187,7 +188,7 @@ export function CheckoutScreen(): React.JSX.Element {
             </Field>
 
             {/* L6: the NIF is optional, and only validated if given. */}
-            <Field label="NIF (opcional)" hint="Para constar na fatura.">
+            <Field label={t('checkout.nif')} hint={t('checkout.nifHint')}>
               <input
                 className={inputClass}
                 value={nif}
@@ -201,8 +202,8 @@ export function CheckoutScreen(): React.JSX.Element {
             <StickyActions>
               <Button type="submit" className="w-full" disabled={createOrder.isPending}>
                 {createOrder.isPending
-                  ? 'A enviar…'
-                  : `Pagar ${formatCents(quote?.totalCents ?? 0)}`}
+                  ? t('checkout.sending')
+                  : t('checkout.payAmount', { total: format.money(quote?.totalCents ?? 0) })}
               </Button>
             </StickyActions>
           </form>

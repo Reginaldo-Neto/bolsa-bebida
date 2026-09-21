@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppHeader } from '../components/chrome';
 import { Alert, Button, Card, Spinner } from '../components/ui';
+import { useTranslation } from '../i18n';
 import { api } from '../lib/api';
 
 /**
@@ -10,6 +11,7 @@ import { api } from '../lib/api';
  * how much someone drank, so quantities and amounts spent never appear here.
  */
 export function RankingScreen(): React.JSX.Element {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const board = useQuery({
@@ -26,7 +28,7 @@ export function RankingScreen(): React.JSX.Element {
   });
 
   if (board.isLoading) {
-    return <Spinner label="A carregar o ranking" />;
+    return <Spinner label={t('ranking.loading')} />;
   }
 
   const data = board.data;
@@ -34,27 +36,23 @@ export function RankingScreen(): React.JSX.Element {
 
   return (
     <>
-      <AppHeader title="Melhor Trader" />
+      <AppHeader title={t('ranking.title')} />
       <main className="mx-auto max-w-lg px-4 pb-6">
         <Card className="mt-3">
-          <p className="text-sm text-muted">
-            A pontuacao mede a qualidade das compras: quanto melhor a cotacao a que comprou face ao
-            preco base, mais pontos. Contam no maximo as primeiras dez unidades, por isso beber mais
-            nunca da mais pontos.
-          </p>
+          <p className="text-sm text-muted">{t('ranking.explain')}</p>
         </Card>
 
         {me && !me.optedIn && (
           <div className="mt-4">
             <Alert>
-              Nao esta no ranking. A sua pontuacao e visivel apenas para si.
+              {t('ranking.notIn')}
               <Button
                 variant="secondary"
                 className="mt-3 w-full"
                 disabled={optIn.isPending}
                 onClick={() => optIn.mutate(true)}
               >
-                Entrar no ranking
+                {t('ranking.join')}
               </Button>
             </Alert>
           </div>
@@ -64,8 +62,10 @@ export function RankingScreen(): React.JSX.Element {
           <Card className="mt-4 border-accent">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-sm text-muted">A sua pontuacao</p>
-                <p className="text-price font-bold tabular">{me.points} pontos</p>
+                <p className="text-sm text-muted">{t('ranking.yourScore')}</p>
+                <p className="text-price font-bold tabular">
+                  {t('ranking.points', { points: me.points })}
+                </p>
               </div>
               {me.optedIn && me.position > 0 && (
                 <p className="text-price font-bold tabular text-accent">#{me.position}</p>
@@ -75,9 +75,7 @@ export function RankingScreen(): React.JSX.Element {
         )}
 
         {data && data.entries.length === 0 ? (
-          <p className="py-12 text-center text-muted">
-            Ainda ninguem tem compras suficientes para entrar no ranking.
-          </p>
+          <p className="py-12 text-center text-muted">{t('ranking.empty')}</p>
         ) : (
           <ol className="mt-6 space-y-2">
             {data?.entries.map((entry) => (
@@ -106,7 +104,9 @@ export function RankingScreen(): React.JSX.Element {
 
         {data && data.teams.length > 0 && (
           <section className="mt-8">
-            <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Equipas</h2>
+            <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">
+              {t('ranking.teams')}
+            </h2>
             <ol className="space-y-2">
               {data.teams.map((team) => (
                 <li
@@ -118,7 +118,9 @@ export function RankingScreen(): React.JSX.Element {
                   </span>
                   <span className="flex-1">{team.teamCode}</span>
                   <span className="text-sm text-muted">
-                    {team.members} {team.members === 1 ? 'pessoa' : 'pessoas'}
+                    {team.members === 1
+                      ? t('ranking.memberOne', { count: team.members })
+                      : t('ranking.memberMany', { count: team.members })}
                   </span>
                   <span className="font-semibold tabular">{team.points}</span>
                 </li>
@@ -134,7 +136,7 @@ export function RankingScreen(): React.JSX.Element {
             disabled={optIn.isPending}
             onClick={() => optIn.mutate(false)}
           >
-            Sair do ranking
+            {t('ranking.leave')}
           </button>
         )}
       </main>

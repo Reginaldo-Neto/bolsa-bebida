@@ -137,6 +137,25 @@ build e a API recusa a rota.
 
 ---
 
+## 4.1. Tema claro/escuro e idioma
+
+Os dois botões redondos no canto superior direito de qualquer ecrã: o sol/lua troca o tema, o
+`EN`/`PT` troca o idioma. A escolha fica guardada no telemóvel e sobrevive a recarregar a página.
+
+| # | O que fazer | O que deve acontecer |
+| --- | --- | --- |
+| 1 | Carregar no sol | Tudo passa a claro, incluindo a barra de estado do telemóvel |
+| 2 | Recarregar a página | Continua claro, **sem piscar escuro** antes de pintar |
+| 3 | Carregar em `EN` | Toda a interface em inglês, e o dinheiro passa a `€2,30` → `€2.30` |
+| 4 | Abrir `/prices?event=<id>` com o tema escuro ligado | A tabela continua **clara** — é para imprimir em papel |
+| 5 | Abrir `/screen?event=<id>` com o tema claro ligado | O ecrã da festa continua **escuro** — é um projetor numa sala escura |
+| 6 | Abrir a aplicação num telemóvel em inglês, pela primeira vez | Entra logo em inglês; num telemóvel em português, entra em português |
+
+Os nomes das bebidas e das categorias vêm da base de dados e **não** são traduzidos: são o que o
+organizador escreveu. As mensagens de erro que chegam da API também vêm em português.
+
+---
+
 ## 5. Percurso do bar
 
 Abra `/staff` **noutro browser ou numa janela anónima** — se usar a mesma janela, partilha a

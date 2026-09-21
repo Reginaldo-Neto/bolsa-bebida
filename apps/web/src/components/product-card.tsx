@@ -1,33 +1,8 @@
 import type { MarketProduct } from '@bolsa/shared';
-import { directionOf, formatCents, formatVolume } from '../lib/format';
+import { useTranslation } from '../i18n';
+import { directionOf, isSoftDrinkLabel, useFormatters } from '../lib/format';
 import { PriceChange } from './price-change';
 import { Sparkline } from './sparkline';
-
-const STOCK_LABELS = {
-  IN_STOCK: null,
-  LOW: 'Ultimas unidades',
-  SOLD_OUT: 'Esgotado',
-} as const;
-
-/**
- * Volume, category and, for a soft drink, the fact that it is one — without
- * saying it twice when the category already does.
- */
-function describe(product: MarketProduct): string {
-  const parts = [formatVolume(product.volumeMl), product.category].filter((part): part is string =>
-    Boolean(part),
-  );
-
-  const softDrink = 'Sem alcool';
-  if (
-    !product.isAlcoholic &&
-    !parts.some((part) => part.toLowerCase() === softDrink.toLowerCase())
-  ) {
-    parts.push(softDrink);
-  }
-
-  return parts.join(' · ');
-}
 
 export function ProductCard({
   product,
@@ -44,8 +19,27 @@ export function ProductCard({
   onAdd: () => void;
   onRemove: () => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const soldOut = product.stockStatus === 'SOLD_OUT';
   const direction = directionOf(product.changeVsBasePct);
+
+  /**
+   * Volume, category and, for a soft drink, the fact that it is one — without
+   * saying it twice when the category already does.
+   */
+  const parts = [format.volume(product.volumeMl), product.category].filter((part): part is string =>
+    Boolean(part),
+  );
+  if (!product.isAlcoholic && !parts.some(isSoftDrinkLabel)) {
+    parts.push(t('price.noAlcohol'));
+  }
+
+  const stockLabel = soldOut
+    ? t('price.soldOut')
+    : product.stockStatus === 'LOW'
+      ? t('price.lowStock')
+      : null;
 
   return (
     <article
@@ -56,14 +50,14 @@ export function ProductCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="truncate text-lg font-semibold">{product.name}</h3>
-          <p className="text-sm text-muted">{describe(product)}</p>
+          <p className="text-sm text-muted">{parts.join(' · ')}</p>
         </div>
         <Sparkline values={history} direction={direction} />
       </div>
 
       <div className="mt-3 flex items-end justify-between gap-3">
         <div>
-          <p className="text-price font-bold tabular">{formatCents(product.priceCents)}</p>
+          <p className="text-price font-bold tabular">{format.money(product.priceCents)}</p>
           <PriceChange ratio={product.changeVsBasePct} className="text-sm" />
         </div>
 
@@ -73,7 +67,7 @@ export function ProductCard({
               <button
                 type="button"
                 onClick={onRemove}
-                aria-label={`Remover um ${product.name} do carrinho`}
+                aria-label={t('market.removeAria', { name: product.name })}
                 className="h-12 w-12 rounded-xl border border-line bg-raised text-xl"
               >
                 −
@@ -87,7 +81,7 @@ export function ProductCard({
             type="button"
             onClick={onAdd}
             disabled={soldOut}
-            aria-label={`Adicionar ${product.name} ao carrinho`}
+            aria-label={t('market.addAria', { name: product.name })}
             className="h-12 w-12 rounded-xl bg-accent text-xl font-bold text-bg disabled:opacity-40"
           >
             +
@@ -97,11 +91,14 @@ export function ProductCard({
 
       {/* L2: the published range travels with the price, always. */}
       <p className="mt-3 border-t border-line pt-2 text-sm text-muted tabular">
-        Intervalo {formatCents(product.minPriceCents)} – {formatCents(product.maxPriceCents)}
-        {STOCK_LABELS[product.stockStatus] && (
+        {t('price.range', {
+          min: format.money(product.minPriceCents),
+          max: format.money(product.maxPriceCents),
+        })}
+        {stockLabel && (
           <span className={soldOut ? 'text-down' : 'text-warning'}>
             {' · '}
-            {STOCK_LABELS[product.stockStatus]}
+            {stockLabel}
           </span>
         )}
       </p>

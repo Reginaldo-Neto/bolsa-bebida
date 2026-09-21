@@ -1,25 +1,28 @@
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from '../i18n';
 import type { ConnectionState } from '../lib/socket';
 import { useCart } from '../lib/store';
-
-const CONNECTION_LABELS: Record<ConnectionState, string> = {
-  connecting: 'a ligar',
-  live: 'ao vivo',
-  reconnecting: 'a reconectar',
-};
+import { SettingsToggle } from './settings-toggle';
 
 /**
  * Spec 4.8 and 11.1: the participant can always tell whether the prices on
  * screen are live. Never show an old price as if it were current.
  */
 export function ConnectionBadge({ state }: { state: ConnectionState }): React.JSX.Element {
+  const { t } = useTranslation();
   const live = state === 'live';
+
+  const labels: Record<ConnectionState, string> = {
+    connecting: t('connection.connecting'),
+    live: t('connection.live'),
+    reconnecting: t('connection.reconnecting'),
+  };
 
   return (
     <span
       role="status"
       aria-live="polite"
-      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${
+      className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1 text-xs ${
         live ? 'border-up/40 text-up' : 'border-warning/40 text-warning'
       }`}
     >
@@ -27,29 +30,30 @@ export function ConnectionBadge({ state }: { state: ConnectionState }): React.JS
         aria-hidden="true"
         className={`h-2 w-2 rounded-full ${live ? 'bg-up' : 'bg-warning animate-pulse'}`}
       />
-      {CONNECTION_LABELS[state]}
+      {labels[state]}
     </span>
   );
 }
 
-const TABS = [
-  { to: '/', label: 'Mercado', icon: '📈' },
-  { to: '/carrinho', label: 'Carrinho', icon: '🛒' },
-  { to: '/vouchers', label: 'Vouchers', icon: '🎟️' },
-  { to: '/ranking', label: 'Ranking', icon: '🏆' },
-] as const;
-
 /** Spec 11.2: four tabs, thumb-reachable, at the bottom. */
 export function BottomNav(): React.JSX.Element {
+  const { t } = useTranslation();
   const items = useCart((state) => state.totalItems());
+
+  const tabs = [
+    { to: '/', label: t('nav.market'), icon: '📈' },
+    { to: '/carrinho', label: t('nav.cart'), icon: '🛒' },
+    { to: '/vouchers', label: t('nav.vouchers'), icon: '🎟️' },
+    { to: '/ranking', label: t('nav.ranking'), icon: '🏆' },
+  ] as const;
 
   return (
     <nav
-      aria-label="Navegacao principal"
+      aria-label={t('nav.aria')}
       className="sticky bottom-0 z-20 border-t border-line bg-bg/95 pb-[env(safe-area-inset-bottom)] backdrop-blur"
     >
       <ul className="mx-auto flex max-w-lg">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <li key={tab.to} className="flex-1">
             <NavLink
               to={tab.to}
@@ -86,9 +90,12 @@ export function AppHeader({
 }): React.JSX.Element {
   return (
     <header className="sticky top-0 z-20 border-b border-line bg-bg/95 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 backdrop-blur">
-      <div className="mx-auto flex max-w-lg items-center justify-between gap-3">
-        <h1 className="truncate text-lg font-semibold">{title}</h1>
-        {connection && <ConnectionBadge state={connection} />}
+      <div className="mx-auto flex max-w-lg items-center justify-between gap-2">
+        <h1 className="min-w-0 truncate text-lg font-semibold">{title}</h1>
+        <div className="flex shrink-0 items-center gap-2">
+          {connection && <ConnectionBadge state={connection} />}
+          <SettingsToggle compact />
+        </div>
       </div>
     </header>
   );

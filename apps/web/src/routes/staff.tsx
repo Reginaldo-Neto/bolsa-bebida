@@ -1,8 +1,11 @@
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SettingsToggle } from '../components/settings-toggle';
 import { Alert, Button, Card, Field, Spinner, inputClass } from '../components/ui';
+import { useTranslation } from '../i18n';
 import { ApiError } from '../lib/api';
+import { useFormatters } from '../lib/format';
 import { staffApi, type ScannedVoucher } from '../lib/staff-api';
 
 /**
@@ -25,6 +28,7 @@ export function StaffApp(): React.JSX.Element {
 
 /** Shared by the staff and admin apps; admin additionally needs a TOTP code. */
 export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Element {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [eventId, setEventId] = useState(localStorage.getItem('bolsa-event') ?? '');
   const [email, setEmail] = useState('');
@@ -47,11 +51,14 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-4">
-      <h1 className="text-2xl font-bold">{role === 'ADMIN' ? 'Administracao' : 'Bar'}</h1>
+      <div className="flex items-center justify-between gap-2">
+        <h1 className="text-2xl font-bold">
+          {role === 'ADMIN' ? t('admin.title') : t('staff.title')}
+        </h1>
+        <SettingsToggle compact />
+      </div>
       <p className="mt-2 text-sm text-muted">
-        {role === 'ADMIN'
-          ? 'Entre com a sua conta e o codigo de verificacao.'
-          : 'Entre com a conta do ponto de levantamento.'}
+        {role === 'ADMIN' ? t('admin.intro') : t('staff.intro')}
       </p>
 
       <form
@@ -61,7 +68,7 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
           login.mutate();
         }}
       >
-        <Field label="Evento" hint="Identificador do evento.">
+        <Field label={t('staff.event')} hint={t('staff.eventHint')}>
           <input
             className={inputClass}
             value={eventId}
@@ -70,7 +77,7 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
           />
         </Field>
 
-        <Field label="Email">
+        <Field label={t('staff.email')}>
           <input
             className={inputClass}
             type="email"
@@ -81,7 +88,7 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
           />
         </Field>
 
-        <Field label="Password">
+        <Field label={t('staff.password')}>
           <input
             className={inputClass}
             type="password"
@@ -93,7 +100,7 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
         </Field>
 
         {role === 'ADMIN' && (
-          <Field label="Codigo de verificacao" hint="Os seis digitos da aplicacao de autenticacao.">
+          <Field label={t('admin.totp')} hint={t('admin.totpHint')}>
             <input
               className={inputClass}
               inputMode="numeric"
@@ -107,12 +114,12 @@ export function StaffLogin({ role }: { role: 'STAFF' | 'ADMIN' }): React.JSX.Ele
 
         {login.isError && (
           <Alert tone="error">
-            {login.error instanceof ApiError ? login.error.message : 'Nao foi possivel entrar.'}
+            {login.error instanceof ApiError ? login.error.message : t('staff.signInFailed')}
           </Alert>
         )}
 
         <Button type="submit" className="w-full" disabled={login.isPending}>
-          {login.isPending ? 'A entrar…' : 'Entrar'}
+          {login.isPending ? t('staff.signingIn') : t('staff.signIn')}
         </Button>
       </form>
     </main>
@@ -125,6 +132,8 @@ type ScanState =
   | { kind: 'error'; message: string };
 
 function StaffScanner(): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [state, setState] = useState<ScanState>({ kind: 'scanning' });
   const [manualCode, setManualCode] = useState('');
@@ -133,47 +142,53 @@ function StaffScanner(): React.JSX.Element {
   const busy = useRef(false);
 
   /** Spec 6.4: the participant lost their session but is standing right here. */
-  const lookUpByPhone = useCallback(async (value: string) => {
-    try {
-      const vouchers = await staffApi.findByPhone(value);
-      if (vouchers.length === 0) {
-        setState({ kind: 'error', message: 'Sem vouchers por levantar para esse numero.' });
+  const lookUpByPhone = useCallback(
+    async (value: string) => {
+      try {
+        const vouchers = await staffApi.findByPhone(value);
+        if (vouchers.length === 0) {
+          setState({ kind: 'error', message: t('staff.noVouchersForPhone') });
+          return;
+        }
+        navigator.vibrate?.(60);
+        setAgeChecked(false);
+        // More than one is rare; the rest are reachable by their short codes.
+        setState({ kind: 'found', voucher: vouchers[0] as ScannedVoucher });
+      } catch (error) {
+        setState({
+          kind: 'error',
+          message: error instanceof ApiError ? error.message : t('staff.lookupFailed'),
+        });
+      }
+    },
+    [t],
+  );
+
+  const lookUp = useCallback(
+    async (payload: { qr: string } | { shortCode: string }) => {
+      if (busy.current) {
         return;
       }
-      navigator.vibrate?.(60);
-      setAgeChecked(false);
-      // More than one is rare; the rest are reachable by their short codes.
-      setState({ kind: 'found', voucher: vouchers[0] as ScannedVoucher });
-    } catch (error) {
-      setState({
-        kind: 'error',
-        message: error instanceof ApiError ? error.message : 'Nao foi possivel procurar.',
-      });
-    }
-  }, []);
+      busy.current = true;
 
-  const lookUp = useCallback(async (payload: { qr: string } | { shortCode: string }) => {
-    if (busy.current) {
-      return;
-    }
-    busy.current = true;
-
-    try {
-      const voucher = await staffApi.scan(payload);
-      // Spec 11.3: something the hand can feel, because the bar is loud.
-      navigator.vibrate?.(60);
-      setAgeChecked(false);
-      setState({ kind: 'found', voucher });
-    } catch (error) {
-      navigator.vibrate?.([60, 60, 60]);
-      setState({
-        kind: 'error',
-        message: error instanceof ApiError ? error.message : 'Voucher invalido.',
-      });
-    } finally {
-      busy.current = false;
-    }
-  }, []);
+      try {
+        const voucher = await staffApi.scan(payload);
+        // Spec 11.3: something the hand can feel, because the bar is loud.
+        navigator.vibrate?.(60);
+        setAgeChecked(false);
+        setState({ kind: 'found', voucher });
+      } catch (error) {
+        navigator.vibrate?.([60, 60, 60]);
+        setState({
+          kind: 'error',
+          message: error instanceof ApiError ? error.message : t('staff.invalidVoucher'),
+        });
+      } finally {
+        busy.current = false;
+      }
+    },
+    [t],
+  );
 
   useEffect(() => {
     if (state.kind !== 'scanning' || !videoRef.current) {
@@ -193,14 +208,11 @@ function StaffScanner(): React.JSX.Element {
         stop = () => controls.stop();
       })
       .catch(() => {
-        setState({
-          kind: 'error',
-          message: 'Sem acesso a camara. Use o codigo curto.',
-        });
+        setState({ kind: 'error', message: t('staff.noCamera') });
       });
 
     return () => stop?.();
-  }, [state.kind, lookUp]);
+  }, [state.kind, lookUp, t]);
 
   const redeem = useMutation({
     mutationFn: (input: { voucherId: string; items: { orderItemId: string; qty: number }[] }) =>
@@ -213,7 +225,7 @@ function StaffScanner(): React.JSX.Element {
       navigator.vibrate?.([60, 60, 60]);
       setState({
         kind: 'error',
-        message: error instanceof ApiError ? error.message : 'Nao foi possivel entregar.',
+        message: error instanceof ApiError ? error.message : t('staff.deliverFailed'),
       });
     },
   });
@@ -233,19 +245,21 @@ function StaffScanner(): React.JSX.Element {
               : 'bg-up/15'
         }`}
       >
-        <p className="text-sm tracking-wide text-muted uppercase">Voucher {voucher.shortCode}</p>
+        <p className="text-sm tracking-wide text-muted uppercase">
+          {t('staff.voucher', { code: voucher.shortCode })}
+        </p>
         <h1 className="mt-1 text-3xl font-bold">{voucher.nickname}</h1>
 
         {pending.length === 0 ? (
           <Alert tone="warning">
-            Tudo ja foi levantado
-            {voucher.lastRedemption &&
-              ` em ${new Date(voucher.lastRedemption.at).toLocaleTimeString('pt-PT')}${
-                voucher.lastRedemption.pickupPoint
-                  ? ` no ${voucher.lastRedemption.pickupPoint}`
-                  : ''
-              }`}
-            .
+            {voucher.lastRedemption
+              ? t('staff.allRedeemedAt', {
+                  when: format.time(voucher.lastRedemption.at),
+                  place: voucher.lastRedemption.pickupPoint
+                    ? t('staff.atPlace', { place: voucher.lastRedemption.pickupPoint })
+                    : '',
+                })
+              : t('staff.allRedeemed')}
           </Alert>
         ) : (
           <>
@@ -258,9 +272,7 @@ function StaffScanner(): React.JSX.Element {
                   checked={ageChecked}
                   onChange={(changeEvent) => setAgeChecked(changeEvent.target.checked)}
                 />
-                <span className="text-lg font-semibold text-warning">
-                  Verificar identificacao (18+)
-                </span>
+                <span className="text-lg font-semibold text-warning">{t('staff.checkAge')}</span>
               </label>
             )}
 
@@ -272,7 +284,7 @@ function StaffScanner(): React.JSX.Element {
                       <div>
                         <p className="text-xl font-semibold">{item.name}</p>
                         <p className="text-sm text-muted">
-                          {item.pendingQty} por entregar de {item.qty}
+                          {t('staff.pendingOf', { pending: item.pendingQty, qty: item.qty })}
                         </p>
                       </div>
                       <Button
@@ -284,7 +296,7 @@ function StaffScanner(): React.JSX.Element {
                           })
                         }
                       >
-                        Entregar {item.pendingQty}
+                        {t('staff.deliver', { count: item.pendingQty })}
                       </Button>
                     </div>
                   </Card>
@@ -305,7 +317,7 @@ function StaffScanner(): React.JSX.Element {
                 })
               }
             >
-              Entregar tudo
+              {t('staff.deliverAll')}
             </Button>
           </>
         )}
@@ -315,7 +327,7 @@ function StaffScanner(): React.JSX.Element {
           className="mt-6 w-full"
           onClick={() => setState({ kind: 'scanning' })}
         >
-          Ler outro voucher
+          {t('staff.scanAnother')}
         </Button>
       </main>
     );
@@ -325,10 +337,10 @@ function StaffScanner(): React.JSX.Element {
     return (
       <main className="grid min-h-dvh place-items-center bg-down/20 px-4 text-center">
         <div>
-          <p className="text-price-lg font-bold text-down">Invalido</p>
+          <p className="text-price-lg font-bold text-down">{t('staff.invalid')}</p>
           <p className="mt-3 text-lg">{state.message}</p>
           <Button className="mt-8 w-full" onClick={() => setState({ kind: 'scanning' })}>
-            Tentar de novo
+            {t('staff.tryAgain')}
           </Button>
         </div>
       </main>
@@ -337,13 +349,17 @@ function StaffScanner(): React.JSX.Element {
 
   return (
     <main className="min-h-dvh px-4 py-4">
+      <div className="mb-3 flex justify-end">
+        <SettingsToggle compact />
+      </div>
+
       <video
         ref={videoRef}
         className="aspect-square w-full rounded-2xl bg-black object-cover"
         muted
         playsInline
       />
-      <p className="mt-3 text-center text-muted">Aponte a camara ao codigo do participante</p>
+      <p className="mt-3 text-center text-muted">{t('staff.pointCamera')}</p>
 
       <form
         className="mt-6 flex gap-2"
@@ -356,12 +372,12 @@ function StaffScanner(): React.JSX.Element {
           className={`${inputClass} tabular uppercase`}
           value={manualCode}
           onChange={(changeEvent) => setManualCode(changeEvent.target.value)}
-          placeholder="Codigo curto"
+          placeholder={t('staff.shortCode')}
           maxLength={6}
-          aria-label="Codigo curto do voucher"
+          aria-label={t('staff.shortCodeAria')}
         />
         <Button type="submit" disabled={manualCode.length !== 6}>
-          Procurar
+          {t('common.search')}
         </Button>
       </form>
 
@@ -379,16 +395,14 @@ function StaffScanner(): React.JSX.Element {
           onChange={(changeEvent) => setPhone(changeEvent.target.value)}
           type="tel"
           inputMode="numeric"
-          placeholder="Telemovel do pagamento"
-          aria-label="Telemovel usado no pagamento"
+          placeholder={t('staff.phone')}
+          aria-label={t('staff.phoneAria')}
         />
         <Button type="submit" variant="secondary" disabled={phone.replace(/\D/g, '').length < 9}>
-          Procurar
+          {t('common.search')}
         </Button>
       </form>
-      <p className="mt-2 text-center text-xs text-muted">
-        Se o participante perdeu a aplicacao, procure pelo numero com que pagou.
-      </p>
+      <p className="mt-2 text-center text-xs text-muted">{t('staff.phoneHint')}</p>
     </main>
   );
 }

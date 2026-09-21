@@ -3,8 +3,9 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppHeader } from '../components/chrome';
 import { Alert, Button, Spinner } from '../components/ui';
+import { useTranslation } from '../i18n';
 import { api } from '../lib/api';
-import { formatCents } from '../lib/format';
+import { useFormatters } from '../lib/format';
 
 /**
  * Spec 11.2: waiting for MB WAY.
@@ -14,6 +15,8 @@ import { formatCents } from '../lib/format';
  * failure they will remember.
  */
 export function PaymentScreen(): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
 
@@ -35,24 +38,20 @@ export function PaymentScreen(): React.JSX.Element {
   }, [order, navigate]);
 
   if (orders.isLoading || !order) {
-    return <Spinner label="A confirmar o pagamento" />;
+    return <Spinner label={t('payment.confirming')} />;
   }
 
   if (order.status === 'FAILED' || order.status === 'EXPIRED') {
     return (
       <>
-        <AppHeader title="Pagamento" />
+        <AppHeader title={t('checkout.title')} />
         <main className="mx-auto max-w-lg px-4 py-6">
           <Alert tone="error">
-            {order.status === 'EXPIRED'
-              ? 'O pagamento demorou demasiado tempo e a reserva foi libertada.'
-              : 'O pagamento foi recusado.'}
+            {order.status === 'EXPIRED' ? t('payment.expired') : t('payment.refused')}
           </Alert>
-          <p className="mt-3 text-sm text-muted">
-            As bebidas voltaram ao mercado. Pode tentar de novo aos precos atuais.
-          </p>
+          <p className="mt-3 text-sm text-muted">{t('payment.released')}</p>
           <Button className="mt-6 w-full" onClick={() => void navigate('/')}>
-            Voltar ao mercado
+            {t('common.backToMarket')}
           </Button>
         </main>
       </>
@@ -61,16 +60,15 @@ export function PaymentScreen(): React.JSX.Element {
 
   return (
     <>
-      <AppHeader title="Pagamento" />
+      <AppHeader title={t('checkout.title')} />
       <main className="mx-auto max-w-lg px-4 py-10 text-center">
         <div
           aria-hidden="true"
           className="mx-auto h-16 w-16 animate-spin rounded-full border-4 border-line border-t-accent"
         />
-        <h2 className="mt-6 text-xl font-semibold">Confirme na aplicacao MB WAY</h2>
+        <h2 className="mt-6 text-xl font-semibold">{t('payment.confirmInApp')}</h2>
         <p className="mt-2 text-muted">
-          Enviamos um pedido de {formatCents(order.totalCents)} para o seu telemovel. Assim que
-          confirmar, o voucher aparece aqui.
+          {t('payment.sentRequest', { total: format.money(order.totalCents) })}
         </p>
 
         <ul className="mt-6 space-y-1 text-sm text-muted">
@@ -82,7 +80,7 @@ export function PaymentScreen(): React.JSX.Element {
         </ul>
 
         <Button variant="ghost" className="mt-8 w-full" onClick={() => void navigate('/')}>
-          Continuar a ver o mercado
+          {t('payment.keepBrowsing')}
         </Button>
 
         {import.meta.env.DEV && order.paymentRef && (
@@ -99,6 +97,7 @@ export function PaymentScreen(): React.JSX.Element {
  * development, and this block is stripped from a production build.
  */
 function DevPaymentControls({ paymentRef }: { paymentRef: string }): React.JSX.Element {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
 
   const simulate = useMutation({
@@ -110,7 +109,7 @@ function DevPaymentControls({ paymentRef }: { paymentRef: string }): React.JSX.E
 
   return (
     <section className="mt-10 rounded-xl border border-dashed border-line p-4 text-left">
-      <p className="text-xs tracking-wide text-muted uppercase">Apenas em desenvolvimento</p>
+      <p className="text-xs tracking-wide text-muted uppercase">{t('payment.devOnly')}</p>
       <div className="mt-3 flex gap-2">
         <Button
           variant="secondary"
@@ -118,7 +117,7 @@ function DevPaymentControls({ paymentRef }: { paymentRef: string }): React.JSX.E
           disabled={simulate.isPending}
           onClick={() => simulate.mutate('PAID')}
         >
-          Confirmar pagamento
+          {t('payment.devConfirm')}
         </Button>
         <Button
           variant="secondary"
@@ -126,7 +125,7 @@ function DevPaymentControls({ paymentRef }: { paymentRef: string }): React.JSX.E
           disabled={simulate.isPending}
           onClick={() => simulate.mutate('FAILED')}
         >
-          Recusar
+          {t('payment.devRefuse')}
         </Button>
       </div>
     </section>

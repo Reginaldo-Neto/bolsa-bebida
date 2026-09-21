@@ -106,6 +106,17 @@ WAY faria. Confirme, e o voucher aparece — pronto a ser lido em `/staff`.
 Esses botões só existem em desenvolvimento: o `import.meta.env.DEV` retira-os do build de produção
 e a API recusa a rota quando `NODE_ENV=production`.
 
+### Tema e idioma
+
+Os dois botões no canto superior direito trocam o tema (escuro/claro) e o idioma (pt-PT/en). A
+escolha fica no `localStorage` do telemóvel e é aplicada em `<html data-theme lang>` antes da
+primeira pintura, por um script em `index.html`, para não piscar. O primeiro idioma vem do
+`navigator.languages`; o tema começa escuro, como manda a secção 11.1 da especificação.
+
+Duas rotas ignoram a escolha de propósito, em `themeForPath`: `/screen` é sempre escuro (é um
+projetor numa sala escura) e `/prices` é sempre claro (é um documento para imprimir). Os nomes
+das bebidas e das categorias vêm da base de dados e não são traduzidos.
+
 ## Pôr no servidor da festa
 
 No VPS (União Europeia, por causa da L7), com o domínio já a apontar para ele:

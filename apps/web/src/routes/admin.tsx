@@ -2,13 +2,16 @@ import type { EventAction } from '@bolsa/shared';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { EngineParams } from '../components/engine-params';
+import { SettingsToggle } from '../components/settings-toggle';
 import { Alert, Button, Card, Field, Spinner, inputClass } from '../components/ui';
-import { formatCents } from '../lib/format';
+import { useTranslation, type TranslationKey } from '../i18n';
+import { useFormatters } from '../lib/format';
 import { adminApi, staffApi } from '../lib/staff-api';
 import { StaffLogin } from './staff';
 
 /** Spec 4.7: the organiser's panel. */
 export function AdminApp(): React.JSX.Element {
+  const { t } = useTranslation();
   const me = useQuery({ queryKey: ['staff-me'], queryFn: staffApi.me, retry: false });
 
   if (me.isLoading) {
@@ -20,7 +23,7 @@ export function AdminApp(): React.JSX.Element {
   if (me.data?.role !== 'ADMIN') {
     return (
       <main className="mx-auto max-w-lg p-6">
-        <Alert tone="error">Esta conta nao tem acesso a administracao.</Alert>
+        <Alert tone="error">{t('admin.noAccess')}</Alert>
       </main>
     );
   }
@@ -28,7 +31,16 @@ export function AdminApp(): React.JSX.Element {
   return <AdminDashboard />;
 }
 
+const STATE_ACTIONS: [EventAction['action'], TranslationKey][] = [
+  ['OPEN', 'admin.open'],
+  ['PAUSED', 'admin.pause'],
+  ['CLOSED_SALES', 'admin.closeSales'],
+  ['FINISHED', 'admin.finish'],
+];
+
 function AdminDashboard(): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const queryClient = useQueryClient();
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -43,14 +55,17 @@ function AdminDashboard(): React.JSX.Element {
   const changeState = useMutation({
     mutationFn: (action: EventAction['action']) => adminApi.changeState(action),
     onSuccess: async (result) => {
-      setNotice(`Estado: ${result.status}${result.fixedPrices ? ' · precos fixos' : ''}`);
+      setNotice(
+        t('admin.state', { status: result.status }) +
+          (result.fixedPrices ? t('admin.stateFixed') : ''),
+      );
       await queryClient.invalidateQueries();
     },
     onError: (error: Error) => setNotice(error.message),
   });
 
   if (dashboard.isLoading) {
-    return <Spinner label="A carregar o painel" />;
+    return <Spinner label={t('admin.loading')} />;
   }
 
   const data = dashboard.data;
@@ -59,23 +74,26 @@ function AdminDashboard(): React.JSX.Element {
     <main className="mx-auto max-w-4xl px-4 py-6">
       <header className="flex flex-wrap items-baseline justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Administracao</h1>
+          <h1 className="text-2xl font-bold">{t('admin.title')}</h1>
           {data && (
             <p className="text-sm text-muted">
               {data.status}
-              {data.fixedPrices && ' · precos fixos'}
+              {data.fixedPrices && t('admin.stateFixed')}
             </p>
           )}
         </div>
-        <button
-          type="button"
-          className="text-sm text-muted underline"
-          onClick={() => {
-            void staffApi.logout().then(() => queryClient.invalidateQueries());
-          }}
-        >
-          Sair
-        </button>
+        <div className="flex items-center gap-3">
+          <SettingsToggle compact />
+          <button
+            type="button"
+            className="text-sm text-muted underline"
+            onClick={() => {
+              void staffApi.logout().then(() => queryClient.invalidateQueries());
+            }}
+          >
+            {t('common.leave')}
+          </button>
+        </div>
       </header>
 
       {notice && (
@@ -96,30 +114,25 @@ function AdminDashboard(): React.JSX.Element {
       )}
 
       <section className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Metric label="Receita" value={formatCents(data?.revenueCents ?? 0)} />
-        <Metric label="Unidades" value={String(data?.unitsSold ?? 0)} />
-        <Metric label="Pendentes" value={String(data?.pendingOrders ?? 0)} />
-        <Metric label="Stock baixo" value={String(data?.lowStockProducts ?? 0)} />
+        <Metric label={t('admin.revenue')} value={format.money(data?.revenueCents ?? 0)} />
+        <Metric label={t('admin.units')} value={String(data?.unitsSold ?? 0)} />
+        <Metric label={t('admin.pending')} value={String(data?.pendingOrders ?? 0)} />
+        <Metric label={t('admin.lowStock')} value={String(data?.lowStockProducts ?? 0)} />
       </section>
 
       <section className="mt-6">
-        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Controlo do evento</h2>
+        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">
+          {t('admin.eventControl')}
+        </h2>
         <div className="flex flex-wrap gap-2">
-          {(
-            [
-              ['OPEN', 'Abrir'],
-              ['PAUSED', 'Pausar'],
-              ['CLOSED_SALES', 'Fechar vendas'],
-              ['FINISHED', 'Terminar'],
-            ] as const
-          ).map(([action, label]) => (
+          {STATE_ACTIONS.map(([action, labelKey]) => (
             <Button
               key={action}
               variant="secondary"
               disabled={changeState.isPending}
               onClick={() => changeState.mutate(action)}
             >
-              {label}
+              {t(labelKey)}
             </Button>
           ))}
         </div>
@@ -131,34 +144,31 @@ function AdminDashboard(): React.JSX.Element {
             disabled={changeState.isPending}
             onClick={() => changeState.mutate('FIXED_PRICES')}
           >
-            Precos fixos (emergencia)
+            {t('admin.fixedPrices')}
           </Button>
           <Button
             variant="secondary"
             disabled={changeState.isPending}
             onClick={() => changeState.mutate('RESUME_PRICES')}
           >
-            Retomar cotacoes
+            {t('admin.resumePrices')}
           </Button>
         </div>
-        <p className="mt-2 text-sm text-muted">
-          Precos fixos devolve todas as bebidas ao preco base e para o motor. As compras continuam a
-          funcionar.
-        </p>
+        <p className="mt-2 text-sm text-muted">{t('admin.fixedPricesNote')}</p>
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Bebidas</h2>
+        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">{t('admin.drinks')}</h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
               <tr className="border-b border-line text-left text-muted">
-                <th className="py-2">Bebida</th>
-                <th className="py-2 text-right">Cotacao</th>
-                <th className="py-2 text-right">Base</th>
-                <th className="py-2 text-right">Disponivel</th>
-                <th className="py-2 text-right">Reservado</th>
-                <th className="py-2 text-right">Vendido</th>
+                <th className="py-2">{t('admin.colDrink')}</th>
+                <th className="py-2 text-right">{t('admin.colQuote')}</th>
+                <th className="py-2 text-right">{t('admin.colBase')}</th>
+                <th className="py-2 text-right">{t('admin.colAvailable')}</th>
+                <th className="py-2 text-right">{t('admin.colReserved')}</th>
+                <th className="py-2 text-right">{t('admin.colSold')}</th>
                 <th className="py-2" />
               </tr>
             </thead>
@@ -174,8 +184,9 @@ function AdminDashboard(): React.JSX.Element {
       {data && <EngineParams params={data.engineParams} onDone={setNotice} />}
 
       <section className="mt-8">
-        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Relatorios</h2>
+        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">{t('admin.reports')}</h2>
         <div className="flex flex-wrap gap-2">
+          {/* The label is the file that downloads, so it keeps its own name. */}
           {['vendas', 'precos', 'levantamentos', 'reembolsos'].map((type) => (
             <a
               key={type}
@@ -189,13 +200,11 @@ function AdminDashboard(): React.JSX.Element {
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">Auditoria</h2>
+        <h2 className="mb-2 text-sm tracking-wide text-muted uppercase">{t('admin.audit')}</h2>
         <ul className="space-y-1 text-sm">
           {(audit.data ?? []).slice(0, 25).map((entry) => (
             <li key={entry.id} className="flex gap-3 border-b border-line/60 py-2">
-              <span className="text-muted tabular">
-                {new Date(entry.createdAt).toLocaleTimeString('pt-PT')}
-              </span>
+              <span className="text-muted tabular">{format.time(entry.createdAt)}</span>
               <span className="font-medium">{entry.action}</span>
               <span className="text-muted">{entry.entity}</span>
             </li>
@@ -230,6 +239,8 @@ function ProductRow({
   };
   onDone: (message: string) => void;
 }): React.JSX.Element {
+  const { t } = useTranslation();
+  const format = useFormatters();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [priceEuros, setPriceEuros] = useState((product.priceCents / 100).toFixed(2));
@@ -248,7 +259,7 @@ function ProductRow({
       return adminApi.adjustStock(product.id, { delta: Number(delta), reason });
     },
     onSuccess: async () => {
-      onDone(`${product.name} atualizado.`);
+      onDone(t('admin.updated', { name: product.name }));
       setOpen(false);
       await queryClient.invalidateQueries();
     },
@@ -259,16 +270,16 @@ function ProductRow({
     <>
       <tr className="border-b border-line/60">
         <td className="py-2">{product.name}</td>
-        <td className="py-2 text-right tabular">{formatCents(product.priceCents)}</td>
+        <td className="py-2 text-right tabular">{format.money(product.priceCents)}</td>
         <td className="py-2 text-right text-muted tabular">
-          {formatCents(product.basePriceCents)}
+          {format.money(product.basePriceCents)}
         </td>
         <td className="py-2 text-right tabular">{product.stockAvailable}</td>
         <td className="py-2 text-right text-muted tabular">{product.stockReserved}</td>
         <td className="py-2 text-right text-muted tabular">{product.stockSold}</td>
         <td className="py-2 text-right">
           <button type="button" className="text-accent underline" onClick={() => setOpen(!open)}>
-            {open ? 'Fechar' : 'Ajustar'}
+            {open ? t('admin.adjustClose') : t('admin.adjust')}
           </button>
         </td>
       </tr>
@@ -277,7 +288,7 @@ function ProductRow({
           <td colSpan={7} className="pb-4">
             <div className="grid gap-4 rounded-xl border border-line bg-surface p-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Field label="Fixar cotacao (EUR)" hint="Tem de estar dentro do intervalo afixado.">
+                <Field label={t('admin.pinPrice')} hint={t('admin.pinPriceHint')}>
                   <input
                     className={inputClass}
                     value={priceEuros}
@@ -285,7 +296,7 @@ function ProductRow({
                     inputMode="decimal"
                   />
                 </Field>
-                <Field label="Durante quantos ticks">
+                <Field label={t('admin.pinTicks')}>
                   <input
                     className={inputClass}
                     value={ticks}
@@ -294,12 +305,12 @@ function ProductRow({
                   />
                 </Field>
                 <Button className="w-full" onClick={() => act.mutate('override')}>
-                  Fixar
+                  {t('admin.pin')}
                 </Button>
               </div>
 
               <div className="space-y-2">
-                <Field label="Ajustar stock" hint="Use um numero negativo para retirar.">
+                <Field label={t('admin.stockAdjust')} hint={t('admin.stockAdjustHint')}>
                   <input
                     className={inputClass}
                     value={delta}
@@ -308,12 +319,12 @@ function ProductRow({
                     placeholder="24"
                   />
                 </Field>
-                <Field label="Motivo" hint="Fica registado na auditoria.">
+                <Field label={t('admin.reason')} hint={t('admin.reasonHint')}>
                   <input
                     className={inputClass}
                     value={reason}
                     onChange={(changeEvent) => setReason(changeEvent.target.value)}
-                    placeholder="Chegou mais um grade"
+                    placeholder={t('admin.reasonPlaceholder')}
                   />
                 </Field>
                 <Button
@@ -322,7 +333,7 @@ function ProductRow({
                   disabled={!delta || reason.trim().length < 3}
                   onClick={() => act.mutate('stock')}
                 >
-                  Ajustar
+                  {t('admin.adjust')}
                 </Button>
               </div>
             </div>

@@ -5,6 +5,8 @@ import type {
   ProblemDetails,
   QuoteResponse,
 } from '@bolsa/shared';
+import { translate } from '../i18n';
+import { useSettings } from './settings';
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
@@ -41,11 +43,14 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
       },
     });
   } catch {
+    // Not a component, so the language is read from the store directly. The
+    // problem details the server sends stay in the server's own language.
+    const locale = useSettings.getState().locale;
     throw new ApiError({
       code: 'network-error' as ProblemCode,
       status: 0,
-      title: 'Sem ligacao',
-      detail: 'Nao foi possivel contactar o servidor. Verifique a ligacao.',
+      title: translate(locale, 'common.offline'),
+      detail: translate(locale, 'common.networkError'),
     });
   }
 

@@ -1,0 +1,342 @@
+import type { TranslationKey } from './pt';
+
+/**
+ * English, for guests whose phone is not in Portuguese.
+ *
+ * Typed against the Portuguese keys, so a string added there and forgotten here
+ * fails the build rather than showing a raw key at the bar.
+ *
+ * L3 applies to this file too, and the compliance test reads this file to make
+ * sure of it. A movement is a change in the quote, never a reduction. That
+ * also rules out the ordinary English word for selling, which reads on a sign
+ * as an invitation to a cheaper price, so the strings below say "selling".
+ */
+export const en: Record<TranslationKey, string> = {
+  // --- shared ------------------------------------------------------------
+  'common.loading': 'Loading',
+  'common.back': 'Back',
+  'common.close': 'Close',
+  'common.total': 'Total',
+  'common.search': 'Search',
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.leave': 'Sign out',
+  'common.notFound': 'This page does not exist.',
+  'common.backToMarket': 'Back to the market',
+  'common.offline': 'No connection',
+  'common.networkError': 'Could not reach the server. Check your connection.',
+
+  'theme.toLight': 'Switch to light theme',
+  'theme.toDark': 'Switch to dark theme',
+  'locale.switch': 'Mudar idioma para portugues',
+  'locale.name': 'English',
+
+  // --- navigation and status ---------------------------------------------
+  'nav.aria': 'Main navigation',
+  'nav.market': 'Market',
+  'nav.cart': 'Cart',
+  'nav.vouchers': 'Vouchers',
+  'nav.ranking': 'Ranking',
+
+  'connection.connecting': 'connecting',
+  'connection.live': 'live',
+  'connection.reconnecting': 'reconnecting',
+
+  'price.up': 'rising',
+  'price.down': 'falling',
+  'price.flat': 'unchanged',
+  'price.aria': 'Change {change}, {direction}',
+  'price.range': 'Range {min} – {max}',
+  'price.noAlcohol': 'Alcohol free',
+  'price.lowStock': 'Almost out',
+  'price.soldOut': 'Sold out',
+
+  // --- entry --------------------------------------------------------------
+  'join.welcome': 'Welcome to',
+  'join.intro':
+    'Drink prices move live with demand, always within a published minimum and maximum for each drink.',
+  'join.nickname': 'What should we call you?',
+  'join.nicknameHint': 'This name appears on your voucher and, if you want, in the ranking.',
+  'join.nicknamePlaceholder': 'Your name or a nickname',
+  'join.adult': 'I declare that I am 18 or older.',
+  'join.adultHint':
+    'Selling alcohol to under-18s is illegal. Bar staff may ask for identification at pickup.',
+  'join.ranking': 'I want to appear in the Best Trader ranking.',
+  'join.rankingHint':
+    'The ranking measures how well you buy, never how much. You can leave it at any time.',
+  'join.submit': 'Enter the market',
+  'join.submitting': 'Entering…',
+  'join.privacy':
+    'We collect only the name you choose and, at payment, your phone number — stored only as an encrypted fingerprint.',
+  'join.privacyLink': 'How we handle your data',
+  'join.needQr': 'Scan the QR code at the venue',
+  'join.needQrHint': 'You enter the market through the QR code posted at the bar or on the screen.',
+
+  // --- market -------------------------------------------------------------
+  'market.title': 'Market',
+  'market.loading': 'Loading the market',
+  'market.error': 'Could not load the market. Check your connection.',
+  'market.paused': 'Quotes are frozen right now. You can still buy at the prices shown.',
+  'market.closed': 'Selling has closed. Vouchers already issued remain valid.',
+  'market.filterAria': 'Filter drinks',
+  'market.filterAll': 'All',
+  'market.empty': 'No drinks in this filter.',
+  'market.viewCart': 'View cart · {count} · {total}',
+  'market.drinkOne': '{count} drink',
+  'market.drinkMany': '{count} drinks',
+  'market.addAria': 'Add {name} to the cart',
+  'market.removeAria': 'Remove one {name} from the cart',
+
+  // --- cart ---------------------------------------------------------------
+  'cart.title': 'Cart',
+  'cart.empty': 'Your cart is empty.',
+  'cart.seeMarket': 'See the market',
+  'cart.each': '{price} each',
+  'cart.lessAria': 'One fewer {name}',
+  'cart.moreAria': 'One more {name}',
+  'cart.soldOut': '{names} sold out. Remove it from the cart to continue.',
+  'cart.alcoholWarning':
+    'There is a limit on alcoholic drinks per period of time. If the purchase is refused, drink some water and come back shortly.',
+  'cart.maxPerProduct': 'Maximum of {max} units per drink in each order.',
+  'cart.pay': 'Pay',
+  'cart.clear': 'Empty the cart',
+
+  // --- checkout -----------------------------------------------------------
+  'checkout.title': 'Payment',
+  'checkout.locking': 'Locking the prices',
+  'checkout.quoteFailed': 'Could not create the quote.',
+  'checkout.backToCart': 'Back to the cart',
+  'checkout.expired': 'The quote has expired.',
+  'checkout.lockedFor': 'Prices locked for',
+  'checkout.lockedNote': 'The amount charged is exactly what is shown here.',
+  'checkout.seeCurrent': 'See the current prices',
+  'checkout.phone': 'MB WAY phone number',
+  'checkout.phoneHint': 'You will get the payment request in the MB WAY app.',
+  'checkout.phoneInvalid': 'Enter a valid Portuguese mobile number.',
+  'checkout.nif': 'Tax number (optional)',
+  'checkout.nifHint': 'To appear on the invoice.',
+  'checkout.nifInvalid': 'That tax number is not valid.',
+  'checkout.payAmount': 'Pay {total}',
+  'checkout.sending': 'Sending…',
+
+  // --- waiting for payment -------------------------------------------------
+  'payment.confirming': 'Confirming the payment',
+  'payment.expired': 'The payment took too long and the reservation was released.',
+  'payment.refused': 'The payment was refused.',
+  'payment.released': 'The drinks went back on the market. You can try again at current prices.',
+  'payment.confirmInApp': 'Confirm in the MB WAY app',
+  'payment.sentRequest':
+    'We sent a request for {total} to your phone. As soon as you confirm, the voucher appears here.',
+  'payment.keepBrowsing': 'Keep browsing the market',
+  'payment.devOnly': 'Development only',
+  'payment.devConfirm': 'Confirm payment',
+  'payment.devRefuse': 'Refuse',
+
+  // --- vouchers ------------------------------------------------------------
+  'vouchers.title': 'My vouchers',
+  'vouchers.loading': 'Loading your vouchers',
+  'vouchers.none': 'You have no vouchers yet.',
+  'vouchers.pending': 'To collect',
+  'vouchers.history': 'History',
+  'vouchers.code': 'code {code}',
+  'voucher.loading': 'Loading the voucher',
+  'voucher.notFound': 'Voucher not found.',
+  'voucher.seeAll': 'See my vouchers',
+  'voucher.qrAria': 'Voucher QR code',
+  'voucher.fallback': 'If the QR will not scan, read out this code',
+  'voucher.brightness': 'Turn your screen brightness up so the code scans.',
+  'voucher.allRedeemed': 'All collected.',
+  'voucher.itemPending': '{pending} of {qty}',
+  'voucher.status.PAID': 'To collect',
+  'voucher.status.PARTIALLY_REDEEMED': 'Partly collected',
+  'voucher.status.REDEEMED': 'Collected',
+  'voucher.status.REFUNDED': 'Refunded',
+  'voucher.status.PENDING': 'Awaiting payment',
+  'voucher.status.FAILED': 'Payment refused',
+  'voucher.status.EXPIRED': 'Expired',
+
+  // --- ranking -------------------------------------------------------------
+  'ranking.title': 'Best Trader',
+  'ranking.loading': 'Loading the ranking',
+  'ranking.explain':
+    'Your score measures how well you bought: the better the quote you paid against the base price, the more points. Only your first ten units count, so drinking more never earns more.',
+  'ranking.notIn': 'You are not in the ranking. Your score is visible only to you.',
+  'ranking.join': 'Join the ranking',
+  'ranking.yourScore': 'Your score',
+  'ranking.points': '{points} points',
+  'ranking.empty': 'Nobody has bought enough yet to enter the ranking.',
+  'ranking.teams': 'Teams',
+  'ranking.memberOne': '{count} person',
+  'ranking.memberMany': '{count} people',
+  'ranking.leave': 'Leave the ranking',
+
+  // --- help ----------------------------------------------------------------
+  'help.title': 'How it works',
+  'help.movesTitle': 'Prices move',
+  'help.movesBody':
+    'Every few minutes the quotes are recalculated from what is selling. A drink in high demand goes up; the alternatives in its group come down.',
+  'help.capTitle': 'There is always a ceiling',
+  'help.capBody':
+    'Every drink has a published minimum and maximum price. The quote never leaves that range, whatever happens.',
+  'help.lockTitle': 'The price you see is the price you pay',
+  'help.lockBody':
+    'When you tap pay, the quote is locked for 60 seconds with a visible countdown. That is exactly what you are charged.',
+  'help.pickupTitle': 'Collecting your drink',
+  'help.pickupBody':
+    'After payment you get a voucher with a QR code. Show it at the bar whenever you like, until the event ends. You do not have to collect everything at once.',
+  'help.responsibleTitle': 'Drinking responsibly',
+  'help.responsibleBody':
+    'There is a limit on alcoholic drinks per period of time, and water is available all night. Selling to under-18s is illegal; bar staff may ask for identification.',
+
+  // --- privacy -------------------------------------------------------------
+  'privacy.title': 'Privacy',
+  'privacy.collectTitle': 'What we collect',
+  'privacy.collectName': 'The name you choose.',
+  'privacy.collectNameBody':
+    'It appears on your voucher and, if you agree, in the ranking. It can be a nickname.',
+  'privacy.collectPhone': 'Your phone number',
+  'privacy.collectPhoneBody':
+    ', only at payment and only for the MB WAY request. We do not store the number: we store an encrypted fingerprint of it, which lets us find your vouchers and cannot be turned back into the number.',
+  'privacy.collectNif': 'Your tax number',
+  'privacy.collectNifBody': ', only if you give it, and only to appear on the invoice.',
+  'privacy.noTracking':
+    'We ask for no email, create no account and use no advertising cookies. The only cookie is your session, without which the app cannot show you your purchases.',
+  'privacy.retentionTitle': 'For how long',
+  'privacy.retentionBody':
+    'Personal data is erased after the event ends. The organiser sets the period, and by default it is 30 days. After that, the name, the phone fingerprint and the team are removed. Invoices and revenue totals are kept for as long as tax law requires, but no longer linked to you.',
+  'privacy.rightsTitle': 'Your rights',
+  'privacy.rightsBody':
+    'You can leave the ranking at any time, from the Ranking tab. You can ask the event organiser for a copy of your data or for it to be erased; they are the data controller and their contacts are posted at the venue.',
+  'privacy.hostingTitle': 'Where it lives',
+  'privacy.hostingBody': 'The data is hosted on servers in the European Union.',
+
+  // --- venue screen --------------------------------------------------------
+  'screen.missingEvent': 'The address is missing the event. Use {example}.',
+  'screen.tick': 'Quote {tick}',
+  'screen.updating': 'updating…',
+  'screen.drink': 'Drink',
+  'screen.quote': 'Quote',
+  'screen.change': 'Change',
+  'screen.min': 'Minimum',
+  'screen.max': 'Maximum',
+  'screen.soldOut': 'sold out',
+  'screen.entryAria': 'Entry code',
+  'screen.pointCamera': 'Point your camera',
+  'screen.banner1': 'Scan the code and buy from your phone',
+  'screen.banner2': 'Drink responsibly. Water is available all night.',
+  'screen.banner3': 'Selling alcohol to under-18s is prohibited',
+
+  // --- printable price list ------------------------------------------------
+  'prices.title': 'Price list — {event}',
+  'prices.intro':
+    'Prices move during the event with demand, always within the published minimum and maximum for each drink. The price shown at the moment of purchase is locked until the payment is confirmed.',
+  'prices.loading': 'Loading the price list',
+  'prices.drink': 'Drink',
+  'prices.volume': 'Volume',
+  'prices.min': 'Minimum',
+  'prices.max': 'Maximum',
+  'prices.noAlcoholSuffix': ' (alcohol free)',
+  'prices.legal': 'Selling alcohol to under-18s is prohibited. Please drink responsibly.',
+  'prices.printedAt': 'List printed on {when}.',
+  'prices.print': 'Print',
+
+  // --- staff ---------------------------------------------------------------
+  'staff.title': 'Bar',
+  'staff.intro': 'Sign in with the pickup point account.',
+  'staff.event': 'Event',
+  'staff.eventHint': 'The event identifier.',
+  'staff.email': 'Email',
+  'staff.password': 'Password',
+  'staff.signIn': 'Sign in',
+  'staff.signingIn': 'Signing in…',
+  'staff.signInFailed': 'Could not sign in.',
+  'staff.voucher': 'Voucher {code}',
+  'staff.allRedeemedAt': 'Everything was already collected at {when}{place}.',
+  'staff.allRedeemed': 'Everything was already collected.',
+  'staff.atPlace': ' at {place}',
+  'staff.checkAge': 'Check identification (18+)',
+  'staff.pendingOf': '{pending} to hand over of {qty}',
+  'staff.deliver': 'Hand over {count}',
+  'staff.deliverAll': 'Hand over everything',
+  'staff.scanAnother': 'Scan another voucher',
+  'staff.invalid': 'Invalid',
+  'staff.invalidVoucher': 'Invalid voucher.',
+  'staff.tryAgain': 'Try again',
+  'staff.noCamera': 'No camera access. Use the short code.',
+  'staff.pointCamera': "Point the camera at the participant's code",
+  'staff.shortCode': 'Short code',
+  'staff.shortCodeAria': 'Voucher short code',
+  'staff.phone': 'Phone used at payment',
+  'staff.phoneAria': 'Phone number used at payment',
+  'staff.phoneHint': 'If the participant lost the app, search by the number they paid with.',
+  'staff.noVouchersForPhone': 'No vouchers left to collect for that number.',
+  'staff.lookupFailed': 'Could not search.',
+  'staff.deliverFailed': 'Could not hand it over.',
+
+  // --- admin ---------------------------------------------------------------
+  'admin.title': 'Administration',
+  'admin.intro': 'Sign in with your account and the verification code.',
+  'admin.totp': 'Verification code',
+  'admin.totpHint': 'The six digits from your authenticator app.',
+  'admin.noAccess': 'This account has no access to administration.',
+  'admin.loading': 'Loading the panel',
+  'admin.revenue': 'Revenue',
+  'admin.units': 'Units',
+  'admin.pending': 'Pending',
+  'admin.lowStock': 'Low stock',
+  'admin.eventControl': 'Event control',
+  'admin.open': 'Open',
+  'admin.pause': 'Pause',
+  'admin.closeSales': 'Stop selling',
+  'admin.finish': 'Finish',
+  'admin.fixedPrices': 'Fixed prices (emergency)',
+  'admin.resumePrices': 'Resume quotes',
+  'admin.fixedPricesNote':
+    'Fixed prices returns every drink to its base price and stops the engine. Purchases keep working.',
+  'admin.state': 'State: {status}',
+  'admin.stateFixed': ' · fixed prices',
+  'admin.drinks': 'Drinks',
+  'admin.colDrink': 'Drink',
+  'admin.colQuote': 'Quote',
+  'admin.colBase': 'Base',
+  'admin.colAvailable': 'Available',
+  'admin.colReserved': 'Reserved',
+  'admin.colSold': 'Sold',
+  'admin.adjust': 'Adjust',
+  'admin.adjustClose': 'Close',
+  'admin.pinPrice': 'Pin the quote (EUR)',
+  'admin.pinPriceHint': 'It must sit inside the published range.',
+  'admin.pinTicks': 'For how many updates',
+  'admin.pin': 'Pin',
+  'admin.stockAdjust': 'Adjust stock',
+  'admin.stockAdjustHint': 'Use a negative number to take stock away.',
+  'admin.reason': 'Reason',
+  'admin.reasonHint': 'It goes into the audit log.',
+  'admin.reasonPlaceholder': 'Another crate arrived',
+  'admin.updated': '{name} updated.',
+  'admin.reports': 'Reports',
+  'admin.audit': 'Audit log',
+
+  // --- engine parameters ---------------------------------------------------
+  'engine.title': 'Pricing engine',
+  'engine.tickSeconds': 'Interval between updates',
+  'engine.tickSecondsHint': 'How often the quotes are recalculated, in seconds.',
+  'engine.demand': 'Response to demand',
+  'engine.demandHint':
+    'How much a price reacts when a drink sells above expectation. Higher means a jumpier market.',
+  'engine.reversion': 'Pull back to the base price',
+  'engine.reversionHint':
+    'How strongly a price that drifted returns to base once demand calms down.',
+  'engine.stock': 'Low stock pressure',
+  'engine.stockHint': 'How much a price rises when a drink is nearly out.',
+  'engine.maxStep': 'Maximum change per update',
+  'engine.maxStepHint': 'The biggest jump a price can make at once. Avoids surprises.',
+  'engine.renormalize': "Keep each group's average price near its base",
+  'engine.renormalizeHint':
+    'With this on, when one drink rises the alternatives in its group come down, and revenue does not depend on how the night happens to go. With it off, prices move freely and revenue can vary a lot.',
+  'engine.effectNote':
+    'Changes only take effect on the next update. Calibrate these in the simulator before the party, not during it.',
+  'engine.save': 'Save parameters',
+  'engine.saving': 'Saving…',
+  'engine.saved': 'Parameters saved. They take effect on the next update.',
+};

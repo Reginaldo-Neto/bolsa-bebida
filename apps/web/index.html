@@ -13,6 +13,27 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="description" content="Mercado de bebidas ao vivo" />
     <title>Bolsa de Bebidas</title>
+    <!--
+      The chosen theme has to be on <html> before the first paint, or a phone
+      set to light flashes the dark background on every load. React applies it
+      again once it mounts; this only removes the flash.
+    -->
+    <script>
+      (function () {
+        try {
+          var pinned = { '/screen': 'dark', '/prices': 'light' };
+          var saved = JSON.parse(localStorage.getItem('bolsa-settings') || '{}');
+          var state = saved.state || {};
+          document.documentElement.dataset.theme =
+            pinned[location.pathname] || state.theme || 'dark';
+          if (state.locale) {
+            document.documentElement.lang = state.locale;
+          }
+        } catch (error) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

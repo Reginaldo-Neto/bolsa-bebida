@@ -1,0 +1,339 @@
+/**
+ * Portuguese (pt-PT), the language the product is written in.
+ *
+ * L3 applies here more than anywhere: these strings are the ones a participant
+ * reads, and none of them may announce a price reduction. The test in
+ * src/compliance.test.ts reads this file.
+ */
+export const pt = {
+  // --- shared ------------------------------------------------------------
+  'common.loading': 'A carregar',
+  'common.back': 'Voltar',
+  'common.close': 'Fechar',
+  'common.total': 'Total',
+  'common.search': 'Procurar',
+  'common.save': 'Guardar',
+  'common.cancel': 'Cancelar',
+  'common.leave': 'Sair',
+  'common.notFound': 'Esta pagina nao existe.',
+  'common.backToMarket': 'Voltar ao mercado',
+  'common.offline': 'Sem ligacao',
+  'common.networkError': 'Nao foi possivel contactar o servidor. Verifique a ligacao.',
+
+  'theme.toLight': 'Mudar para tema claro',
+  'theme.toDark': 'Mudar para tema escuro',
+  'locale.switch': 'Change language to English',
+  'locale.name': 'Portugues',
+
+  // --- navigation and status ---------------------------------------------
+  'nav.aria': 'Navegacao principal',
+  'nav.market': 'Mercado',
+  'nav.cart': 'Carrinho',
+  'nav.vouchers': 'Vouchers',
+  'nav.ranking': 'Ranking',
+
+  'connection.connecting': 'a ligar',
+  'connection.live': 'ao vivo',
+  'connection.reconnecting': 'a reconectar',
+
+  'price.up': 'a subir',
+  'price.down': 'a descer',
+  'price.flat': 'sem variacao',
+  'price.aria': 'Variacao {change}, {direction}',
+  'price.range': 'Intervalo {min} – {max}',
+  'price.noAlcohol': 'Sem alcool',
+  'price.lowStock': 'Ultimas unidades',
+  'price.soldOut': 'Esgotado',
+
+  // --- entry --------------------------------------------------------------
+  'join.welcome': 'Bem-vindo a',
+  'join.intro':
+    'Os precos das bebidas variam ao vivo conforme a procura, sempre dentro de um intervalo minimo e maximo afixado para cada bebida.',
+  'join.nickname': 'Como quer ser tratado?',
+  'join.nicknameHint': 'Este nome aparece no voucher e, se quiser, no ranking.',
+  'join.nicknamePlaceholder': 'O seu nome ou alcunha',
+  'join.adult': 'Declaro que tenho 18 anos ou mais.',
+  'join.adultHint':
+    'A venda de bebidas alcoolicas a menores de 18 anos e proibida. O pessoal do bar pode pedir identificacao no levantamento.',
+  'join.ranking': 'Quero aparecer no ranking Melhor Trader.',
+  'join.rankingHint':
+    'O ranking mede a qualidade das compras, nunca a quantidade. Pode sair quando quiser.',
+  'join.submit': 'Entrar no mercado',
+  'join.submitting': 'A entrar…',
+  'join.privacy':
+    'Recolhemos apenas o nome que escolher e, no pagamento, o numero de telemovel — guardado apenas em forma cifrada.',
+  'join.privacyLink': 'Como tratamos os seus dados',
+  'join.needQr': 'Leia o codigo QR no local',
+  'join.needQrHint':
+    'A entrada no mercado faz-se pelo codigo QR afixado no bar ou no ecra da festa.',
+
+  // --- market -------------------------------------------------------------
+  'market.title': 'Mercado',
+  'market.loading': 'A carregar o mercado',
+  'market.error': 'Nao foi possivel carregar o mercado. Verifique a ligacao.',
+  'market.paused':
+    'Cotacoes congeladas neste momento. Pode continuar a comprar aos precos apresentados.',
+  'market.closed': 'As vendas estao fechadas. Os vouchers ja emitidos continuam validos.',
+  'market.filterAria': 'Filtrar bebidas',
+  'market.filterAll': 'Todas',
+  'market.empty': 'Nenhuma bebida neste filtro.',
+  'market.viewCart': 'Ver carrinho · {count} · {total}',
+  'market.drinkOne': '{count} bebida',
+  'market.drinkMany': '{count} bebidas',
+  'market.addAria': 'Adicionar {name} ao carrinho',
+  'market.removeAria': 'Remover um {name} do carrinho',
+
+  // --- cart ---------------------------------------------------------------
+  'cart.title': 'Carrinho',
+  'cart.empty': 'O carrinho esta vazio.',
+  'cart.seeMarket': 'Ver o mercado',
+  'cart.each': '{price} cada',
+  'cart.lessAria': 'Menos um {name}',
+  'cart.moreAria': 'Mais um {name}',
+  'cart.soldOut': '{names} esgotou. Remova do carrinho para continuar.',
+  'cart.alcoholWarning':
+    'Ha um limite de bebidas alcoolicas por periodo de tempo. Se a compra for recusada, beba agua e volte daqui a pouco.',
+  'cart.maxPerProduct': 'Maximo de {max} unidades por bebida em cada encomenda.',
+  'cart.pay': 'Pagar',
+  'cart.clear': 'Esvaziar carrinho',
+
+  // --- checkout -----------------------------------------------------------
+  'checkout.title': 'Pagamento',
+  'checkout.locking': 'A bloquear os precos',
+  'checkout.quoteFailed': 'Nao foi possivel criar a cotacao.',
+  'checkout.backToCart': 'Voltar ao carrinho',
+  'checkout.expired': 'A cotacao expirou.',
+  'checkout.lockedFor': 'Precos bloqueados durante',
+  'checkout.lockedNote': 'O valor cobrado e exatamente o que esta aqui.',
+  'checkout.seeCurrent': 'Ver os precos atuais',
+  'checkout.phone': 'Telemovel MB WAY',
+  'checkout.phoneHint': 'Recebe o pedido de pagamento na aplicacao MB WAY.',
+  'checkout.phoneInvalid': 'Indique um numero de telemovel portugues valido.',
+  'checkout.nif': 'NIF (opcional)',
+  'checkout.nifHint': 'Para constar na fatura.',
+  'checkout.nifInvalid': 'O NIF indicado nao e valido.',
+  'checkout.payAmount': 'Pagar {total}',
+  'checkout.sending': 'A enviar…',
+
+  // --- waiting for payment -------------------------------------------------
+  'payment.confirming': 'A confirmar o pagamento',
+  'payment.expired': 'O pagamento demorou demasiado tempo e a reserva foi libertada.',
+  'payment.refused': 'O pagamento foi recusado.',
+  'payment.released': 'As bebidas voltaram ao mercado. Pode tentar de novo aos precos atuais.',
+  'payment.confirmInApp': 'Confirme na aplicacao MB WAY',
+  'payment.sentRequest':
+    'Enviamos um pedido de {total} para o seu telemovel. Assim que confirmar, o voucher aparece aqui.',
+  'payment.keepBrowsing': 'Continuar a ver o mercado',
+  'payment.devOnly': 'Apenas em desenvolvimento',
+  'payment.devConfirm': 'Confirmar pagamento',
+  'payment.devRefuse': 'Recusar',
+
+  // --- vouchers ------------------------------------------------------------
+  'vouchers.title': 'Os meus vouchers',
+  'vouchers.loading': 'A carregar os vouchers',
+  'vouchers.none': 'Ainda nao tem vouchers.',
+  'vouchers.pending': 'Por levantar',
+  'vouchers.history': 'Historico',
+  'vouchers.code': 'codigo {code}',
+  'voucher.loading': 'A carregar o voucher',
+  'voucher.notFound': 'Voucher nao encontrado.',
+  'voucher.seeAll': 'Ver os meus vouchers',
+  'voucher.qrAria': 'Codigo QR do voucher',
+  'voucher.fallback': 'Se o QR nao ler, diga este codigo',
+  'voucher.brightness': 'Suba o brilho do ecra para o codigo ler melhor.',
+  'voucher.allRedeemed': 'Tudo levantado.',
+  'voucher.itemPending': '{pending} de {qty}',
+  'voucher.status.PAID': 'Por levantar',
+  'voucher.status.PARTIALLY_REDEEMED': 'Levantamento parcial',
+  'voucher.status.REDEEMED': 'Levantado',
+  'voucher.status.REFUNDED': 'Reembolsado',
+  'voucher.status.PENDING': 'A aguardar pagamento',
+  'voucher.status.FAILED': 'Pagamento recusado',
+  'voucher.status.EXPIRED': 'Expirado',
+
+  // --- ranking -------------------------------------------------------------
+  'ranking.title': 'Melhor Trader',
+  'ranking.loading': 'A carregar o ranking',
+  'ranking.explain':
+    'A pontuacao mede a qualidade das compras: quanto melhor a cotacao a que comprou face ao preco base, mais pontos. Contam no maximo as primeiras dez unidades, por isso beber mais nunca da mais pontos.',
+  'ranking.notIn': 'Nao esta no ranking. A sua pontuacao e visivel apenas para si.',
+  'ranking.join': 'Entrar no ranking',
+  'ranking.yourScore': 'A sua pontuacao',
+  'ranking.points': '{points} pontos',
+  'ranking.empty': 'Ainda ninguem tem compras suficientes para entrar no ranking.',
+  'ranking.teams': 'Equipas',
+  'ranking.memberOne': '{count} pessoa',
+  'ranking.memberMany': '{count} pessoas',
+  'ranking.leave': 'Sair do ranking',
+
+  // --- help ----------------------------------------------------------------
+  'help.title': 'Como funciona',
+  'help.movesTitle': 'Os precos mexem-se',
+  'help.movesBody':
+    'A cada poucos minutos as cotacoes sao recalculadas conforme o que se esta a vender. Uma bebida muito procurada sobe; as alternativas do mesmo grupo descem.',
+  'help.capTitle': 'Ha sempre um teto',
+  'help.capBody':
+    'Cada bebida tem um preco minimo e um preco maximo afixados. A cotacao nunca sai desse intervalo, aconteca o que acontecer.',
+  'help.lockTitle': 'O preco que ve e o preco que paga',
+  'help.lockBody':
+    'Quando carrega em pagar, a cotacao fica bloqueada durante 60 segundos com uma contagem visivel. O valor cobrado e exatamente esse.',
+  'help.pickupTitle': 'Levantar a bebida',
+  'help.pickupBody':
+    'Depois do pagamento recebe um voucher com codigo QR. Mostre-o no bar quando quiser, ate ao fim do evento. Nao tem de levantar tudo de uma vez.',
+  'help.responsibleTitle': 'Consumo responsavel',
+  'help.responsibleBody':
+    'Ha um limite de bebidas alcoolicas por periodo de tempo, e agua disponivel a noite toda. A venda a menores de 18 anos e proibida; o pessoal do bar pode pedir identificacao.',
+
+  // --- privacy -------------------------------------------------------------
+  'privacy.title': 'Privacidade',
+  'privacy.collectTitle': 'O que recolhemos',
+  'privacy.collectName': 'O nome que escolher.',
+  'privacy.collectNameBody':
+    'Aparece no seu voucher e, se aceitar, no ranking. Pode ser uma alcunha.',
+  'privacy.collectPhone': 'O numero de telemovel',
+  'privacy.collectPhoneBody':
+    ', apenas no momento do pagamento e apenas para o pedido MB WAY. Nao guardamos o numero: guardamos uma impressao digital cifrada dele, que serve para recuperar os seus vouchers e nao permite reconstruir o numero.',
+  'privacy.collectNif': 'O NIF',
+  'privacy.collectNifBody': ', so se o indicar, e apenas para constar na fatura.',
+  'privacy.noTracking':
+    'Nao pedimos email, nao criamos conta e nao usamos cookies de publicidade. O unico cookie e o da sua sessao, sem o qual a aplicacao nao consegue mostrar-lhe as suas compras.',
+  'privacy.retentionTitle': 'Durante quanto tempo',
+  'privacy.retentionBody':
+    'Os dados pessoais sao apagados depois do evento terminar. O prazo e definido pelo organizador e por omissao sao 30 dias. Ao fim dele, o nome, a impressao digital do telemovel e a equipa sao removidos. As faturas e os totais de vendas ficam pelo prazo que a lei fiscal exige, mas ja sem ligacao a si.',
+  'privacy.rightsTitle': 'Os seus direitos',
+  'privacy.rightsBody':
+    'Pode sair do ranking a qualquer momento, no separador Ranking. Pode pedir uma copia ou a eliminacao dos seus dados ao organizador do evento, que e o responsavel pelo tratamento e cujos contactos estao afixados no local.',
+  'privacy.hostingTitle': 'Onde ficam',
+  'privacy.hostingBody': 'Os dados sao alojados em servidores na Uniao Europeia.',
+
+  // --- venue screen --------------------------------------------------------
+  'screen.missingEvent': 'Falta o evento no endereco. Use {example}.',
+  'screen.tick': 'Cotacao {tick}',
+  'screen.updating': 'a atualizar…',
+  'screen.drink': 'Bebida',
+  'screen.quote': 'Cotacao',
+  'screen.change': 'Variacao',
+  'screen.min': 'Minimo',
+  'screen.max': 'Maximo',
+  'screen.soldOut': 'esgotado',
+  'screen.entryAria': 'Codigo de entrada',
+  'screen.pointCamera': 'Aponte a camara',
+  'screen.banner1': 'Leia o codigo e compre pelo telemovel',
+  'screen.banner2': 'Beba com moderacao. Ha agua disponivel a noite toda.',
+  'screen.banner3': 'Venda de bebidas alcoolicas proibida a menores de 18 anos',
+
+  // --- printable price list ------------------------------------------------
+  'prices.title': 'Tabela de precos — {event}',
+  'prices.intro':
+    'Os precos variam ao longo do evento conforme a procura, sempre dentro do intervalo minimo e maximo indicado para cada bebida. O preco apresentado no momento da compra fica bloqueado ate a confirmacao do pagamento.',
+  'prices.loading': 'A carregar a tabela de precos',
+  'prices.drink': 'Bebida',
+  'prices.volume': 'Volume',
+  'prices.min': 'Minimo',
+  'prices.max': 'Maximo',
+  'prices.noAlcoholSuffix': ' (sem alcool)',
+  'prices.legal': 'Venda de bebidas alcoolicas proibida a menores de 18 anos. Beba com moderacao.',
+  'prices.printedAt': 'Tabela impressa em {when}.',
+  'prices.print': 'Imprimir',
+
+  // --- staff ---------------------------------------------------------------
+  'staff.title': 'Bar',
+  'staff.intro': 'Entre com a conta do ponto de levantamento.',
+  'staff.event': 'Evento',
+  'staff.eventHint': 'Identificador do evento.',
+  'staff.email': 'Email',
+  'staff.password': 'Password',
+  'staff.signIn': 'Entrar',
+  'staff.signingIn': 'A entrar…',
+  'staff.signInFailed': 'Nao foi possivel entrar.',
+  'staff.voucher': 'Voucher {code}',
+  'staff.allRedeemedAt': 'Tudo ja foi levantado em {when}{place}.',
+  'staff.allRedeemed': 'Tudo ja foi levantado.',
+  'staff.atPlace': ' no {place}',
+  'staff.checkAge': 'Verificar identificacao (18+)',
+  'staff.pendingOf': '{pending} por entregar de {qty}',
+  'staff.deliver': 'Entregar {count}',
+  'staff.deliverAll': 'Entregar tudo',
+  'staff.scanAnother': 'Ler outro voucher',
+  'staff.invalid': 'Invalido',
+  'staff.invalidVoucher': 'Voucher invalido.',
+  'staff.tryAgain': 'Tentar de novo',
+  'staff.noCamera': 'Sem acesso a camara. Use o codigo curto.',
+  'staff.pointCamera': 'Aponte a camara ao codigo do participante',
+  'staff.shortCode': 'Codigo curto',
+  'staff.shortCodeAria': 'Codigo curto do voucher',
+  'staff.phone': 'Telemovel do pagamento',
+  'staff.phoneAria': 'Telemovel usado no pagamento',
+  'staff.phoneHint': 'Se o participante perdeu a aplicacao, procure pelo numero com que pagou.',
+  'staff.noVouchersForPhone': 'Sem vouchers por levantar para esse numero.',
+  'staff.lookupFailed': 'Nao foi possivel procurar.',
+  'staff.deliverFailed': 'Nao foi possivel entregar.',
+
+  // --- admin ---------------------------------------------------------------
+  'admin.title': 'Administracao',
+  'admin.intro': 'Entre com a sua conta e o codigo de verificacao.',
+  'admin.totp': 'Codigo de verificacao',
+  'admin.totpHint': 'Os seis digitos da aplicacao de autenticacao.',
+  'admin.noAccess': 'Esta conta nao tem acesso a administracao.',
+  'admin.loading': 'A carregar o painel',
+  'admin.revenue': 'Receita',
+  'admin.units': 'Unidades',
+  'admin.pending': 'Pendentes',
+  'admin.lowStock': 'Stock baixo',
+  'admin.eventControl': 'Controlo do evento',
+  'admin.open': 'Abrir',
+  'admin.pause': 'Pausar',
+  'admin.closeSales': 'Fechar vendas',
+  'admin.finish': 'Terminar',
+  'admin.fixedPrices': 'Precos fixos (emergencia)',
+  'admin.resumePrices': 'Retomar cotacoes',
+  'admin.fixedPricesNote':
+    'Precos fixos devolve todas as bebidas ao preco base e para o motor. As compras continuam a funcionar.',
+  'admin.state': 'Estado: {status}',
+  'admin.stateFixed': ' · precos fixos',
+  'admin.drinks': 'Bebidas',
+  'admin.colDrink': 'Bebida',
+  'admin.colQuote': 'Cotacao',
+  'admin.colBase': 'Base',
+  'admin.colAvailable': 'Disponivel',
+  'admin.colReserved': 'Reservado',
+  'admin.colSold': 'Vendido',
+  'admin.adjust': 'Ajustar',
+  'admin.adjustClose': 'Fechar',
+  'admin.pinPrice': 'Fixar cotacao (EUR)',
+  'admin.pinPriceHint': 'Tem de estar dentro do intervalo afixado.',
+  'admin.pinTicks': 'Durante quantas atualizacoes',
+  'admin.pin': 'Fixar',
+  'admin.stockAdjust': 'Ajustar stock',
+  'admin.stockAdjustHint': 'Use um numero negativo para retirar.',
+  'admin.reason': 'Motivo',
+  'admin.reasonHint': 'Fica registado na auditoria.',
+  'admin.reasonPlaceholder': 'Chegou mais um grade',
+  'admin.updated': '{name} atualizado.',
+  'admin.reports': 'Relatorios',
+  'admin.audit': 'Auditoria',
+
+  // --- engine parameters ---------------------------------------------------
+  'engine.title': 'Motor de precos',
+  'engine.tickSeconds': 'Intervalo entre atualizacoes',
+  'engine.tickSecondsHint': 'De quanto em quanto tempo as cotacoes sao recalculadas, em segundos.',
+  'engine.demand': 'Resposta a procura',
+  'engine.demandHint':
+    'Quanto o preco reage a uma bebida vender acima do esperado. Mais alto, mercado mais nervoso.',
+  'engine.reversion': 'Regresso ao preco base',
+  'engine.reversionHint': 'Com que forca um preco afastado volta ao base quando as vendas acalmam.',
+  'engine.stock': 'Pressao de stock baixo',
+  'engine.stockHint': 'Quanto o preco sobe quando uma bebida esta quase a acabar.',
+  'engine.maxStep': 'Variacao maxima por atualizacao',
+  'engine.maxStepHint': 'O salto maior que um preco pode dar de uma vez. Evita surpresas.',
+  'engine.renormalize': 'Manter o preco medio de cada grupo perto do base',
+  'engine.renormalizeHint':
+    'Com isto ligado, quando uma bebida sobe as alternativas do mesmo grupo descem, e a receita nao depende do que a noite calhar a correr. Desligado, os precos movem-se livremente e a receita pode variar bastante.',
+  'engine.effectNote':
+    'As alteracoes so entram em vigor na atualizacao seguinte. Calibre estes valores no simulador antes da festa, nao durante.',
+  'engine.save': 'Guardar parametros',
+  'engine.saving': 'A guardar…',
+  'engine.saved': 'Parametros guardados. Entram em vigor na proxima atualizacao.',
+} as const;
+
+export type TranslationKey = keyof typeof pt;

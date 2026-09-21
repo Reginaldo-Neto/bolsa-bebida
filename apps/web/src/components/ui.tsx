@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { useTranslation } from '../i18n';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 
@@ -103,14 +104,16 @@ export function Alert({
   );
 }
 
-export function Spinner({ label = 'A carregar' }: { label?: string }): React.JSX.Element {
+export function Spinner({ label }: { label?: string }): React.JSX.Element {
+  const { t } = useTranslation();
+
   return (
     <div role="status" className="flex items-center justify-center gap-3 py-10 text-muted">
       <span
         aria-hidden="true"
         className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-accent"
       />
-      {label}
+      {label ?? t('common.loading')}
     </div>
   );
 }

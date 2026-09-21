@@ -2,7 +2,11 @@
 
 /**
  * Spec 11.1: dark by default, at least WCAG AA, and readable at arm's length in
- * a dark, noisy room. Every colour below is checked against --color-bg.
+ * a dark, noisy room. Light is an explicit choice, for anyone reading this in
+ * daylight or with a preference for it.
+ *
+ * The tokens below are the dark values. The light theme redefines the same
+ * custom properties, so every utility built on them switches at once.
  */
 @theme {
   --color-bg: #0b0f14;
@@ -32,12 +36,41 @@
   --text-price-lg--line-height: 1;
 }
 
+/**
+ * Light theme. Every colour here is checked against its background for WCAG AA:
+ * the greens and reds are darkened well past their dark-theme versions, because
+ * a colour that reads on black disappears on white.
+ */
+[data-theme='light'] {
+  --color-bg: #f6f8fb;
+  --color-surface: #ffffff;
+  --color-raised: #eef2f7;
+  --color-line: #d3dce6;
+
+  --color-text: #0d1620;
+  /* 7.1:1 on --color-bg */
+  --color-muted: #4a5c72;
+
+  /* 4.8:1 and 5.9:1 on --color-bg */
+  --color-up: #0a7a4d;
+  --color-down: #c02222;
+
+  --color-accent: #1160c4;
+  /* Amber is the hardest to carry over: this is the darkest that still reads
+     as a warning rather than as brown. */
+  --color-warning: #8a5a00;
+}
+
 @layer base {
   html {
     background-color: var(--color-bg);
+    /* Keeps form controls, scrollbars and caret in step with the theme. */
     color-scheme: dark;
-    /* Stops iOS from zooming when a field is focused. */
     -webkit-text-size-adjust: 100%;
+  }
+
+  html[data-theme='light'] {
+    color-scheme: light;
   }
 
   body {
